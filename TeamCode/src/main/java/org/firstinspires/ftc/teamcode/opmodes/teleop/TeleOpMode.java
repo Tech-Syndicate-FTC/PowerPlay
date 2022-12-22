@@ -1,15 +1,10 @@
-package org.firstinspires.ftc.teamcode.drive.opmodes.teleop;
+package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
-import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain.DriveTrain;
-import org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain.Elevator;
-
-import java.util.Locale;
+import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal

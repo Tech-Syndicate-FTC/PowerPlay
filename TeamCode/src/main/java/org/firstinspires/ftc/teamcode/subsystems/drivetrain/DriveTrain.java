@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain;
+package org.firstinspires.ftc.teamcode.subsystems.drivetrain;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
@@ -8,8 +8,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.opmodes.AutoOpMode;
+import org.firstinspires.ftc.teamcode.DriveConstants;
+import org.firstinspires.ftc.teamcode.opmodes.AutoOpMode;
 
 public class DriveTrain extends MecanumBase {
     public boolean FtcDashboard_FLAG = true;

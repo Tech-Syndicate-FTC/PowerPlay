@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.opmodes;
+package org.firstinspires.ftc.teamcode.opmodes;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -9,13 +9,13 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain.DriveTrain;
+import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
 
 /*
  * This is a simple routine to test translational drive capabilities.
  */
 @Config
-@Autonomous(name = "Testing Autonomous v1", group = "Autonomous", preselectTeleOp = "Competition TeleOp")
+@Autonomous(name = "Testing Autonomous v1", group = "Autonomous")
 public class AutoOpMode extends LinearOpMode {
     public DriveTrain drive;
     public static double DISTANCE = 20; // in

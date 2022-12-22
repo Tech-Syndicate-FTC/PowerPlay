@@ -1,15 +1,15 @@
-package org.firstinspires.ftc.teamcode.drive.opmodes.auto;
+package org.firstinspires.ftc.teamcode.opmodes.auto;
 
 
-import static org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain.MecanumBase.getVelocityConstraint;
+import static org.firstinspires.ftc.teamcode.subsystems.drivetrain.MecanumBase.getVelocityConstraint;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.subsystems.Vision;
-import org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain.DriveTrain;
+import org.firstinspires.ftc.teamcode.DriveConstants;
+import org.firstinspires.ftc.teamcode.subsystems.Vision;
+import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
 import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
 
 /**

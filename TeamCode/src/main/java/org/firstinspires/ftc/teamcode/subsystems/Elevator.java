@@ -1,19 +1,19 @@
-package org.firstinspires.ftc.teamcode.drive.subsystems;
+package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.AUTO_GRAB;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.AUTO_RELEASE;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.FLIPPING_UP;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.GOING_HOME_OPEN;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.HOME_CLOSED;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.HOME_OPEN;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.HOMING;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.IDLE;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.IN_POSITION_CLOSED;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.IN_POSITION_OPEN;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.MOVING_CLOSED;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.MOVING_OPEN;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.RELEASING;
-import static org.firstinspires.ftc.teamcode.drive.subsystems.ElevatorState.WAITING_TO_MOVE;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.AUTO_GRAB;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.AUTO_RELEASE;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.FLIPPING_UP;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.GOING_HOME_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.HOME_CLOSED;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.HOME_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.HOMING;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.IDLE;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.IN_POSITION_CLOSED;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.IN_POSITION_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.MOVING_CLOSED;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.MOVING_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.RELEASING;
+import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.WAITING_TO_MOVE;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;

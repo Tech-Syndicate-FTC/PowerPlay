@@ -6,9 +6,7 @@ import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
 import com.noahbres.meepmeep.roadrunner.DriveShim;
 import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
 import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequence;
-
-import java.util.Arrays;
-import java.util.List;
+import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
 
 public class MeepMeepTesting {
 
@@ -28,74 +26,49 @@ public class MeepMeepTesting {
     static double halfTile = tile / 2;
 
     //Initialize any other Pose2d's as desired
-    static Pose2d initPose = new Pose2d(1.5 * tile, -2.5 * tile, Math.toRadians(90));
-    static Pose2d midPose = new Pose2d(0.5 * tile, -2.5 * tile, Math.toRadians(90));
-    static Pose2d dropPreConePose = new Pose2d(0.5 * tile, -tile, Math.toRadians(180)); //Choose the pose to move to the sxtack of cones
-    static Pose2d partWayPose = new Pose2d(halfTile, -halfTile, Math.toRadians(90));
-    static Pose2d pickConePose = new Pose2d(2.5 * tile - 4, -halfTile, Math.toRadians(0)); //Choose the pose to move to the stack of cones
-    static Pose2d midWayPose = new Pose2d(1.5 * tile, -halfTile, Math.toRadians(90));
-    //static Pose2d midWayPose = new Pose2d(tile, -halfTile, Math.toRadians(90));
-    static Pose2d dropConePose = new Pose2d(32, -8, Math.toRadians(135)); //Choose the pose to move to the stack of cones
-    //static Pose2d dropConePose = new Pose2d(tile, -halfTile + 1, Math.toRadians(90)); //Choose the pose to move to the stack of cones
-    static Pose2d parkPose; //= new Pose2d(12, -12, Math.toRadians(270));
+    static Pose2d initPose = relativePose(1.5 * tile, -2.5 * tile, 90);
+    static Pose2d avoidSignalPose = relativePose(0.5 * tile, -2.5 * tile, 90);
+    static Pose2d dropPreloadedConePose = relativePose(0.5 * tile, -tile, 180);
+    static Pose2d postPreloadedDropPose = relativePose(halfTile, -halfTile, 90);
+    static Pose2d pickConePose = relativePose(2.5 * tile - 4, -halfTile, 0);
+    static Pose2d midWayPose = relativePose(1.5 * tile, -halfTile, 90);
+    static Pose2d dropConePose = relativePose(32, -8, 135);
+    static Pose2d parkPose;
 
-    static List<Pose2d> poses = Arrays.asList(initPose, midPose, dropPreConePose, partWayPose, midWayPose, pickConePose, dropConePose);
+    public static Pose2d relativePose(double x, double y, double heading) {
+        if (startPosition == START_POSITION.LEFT) {
+            x = -x;
+            heading = 180 - heading;
+        }
+        return new Pose2d(x, y, Math.toRadians(heading));
+    }
 
     //Set all position based on selected staring location and Build Autonomous Trajectory
     public static void buildAuto(DriveShim drive) {
-        boolean flipSide = false;
-        if (startPosition == START_POSITION.LEFT) {
-            flipSide = true;
-        }
+        int coneAmt = 3;
 
         buildParking();
 
-        for (int i = 0; i < poses.size(); i++) {
-            Pose2d pose = poses.get(i);
-            double x = pose.getX();
-            double y = pose.getY();
-            double heading = Math.toDegrees(pose.getHeading());
-            if (flipSide) {
-                x = -x;
-                heading = 180 - heading;
-            }
-            poses.set(i, new Pose2d(x, y, Math.toRadians(heading)));
+        TrajectorySequenceBuilder tmpTrj = drive.trajectorySequenceBuilder(initPose)
+                .lineToLinearHeading(avoidSignalPose)
+                .lineToLinearHeading(dropPreloadedConePose)
+                .addDisplacementMarker(() -> dropCone(0))
+                .lineToLinearHeading(postPreloadedDropPose)
+                .lineToLinearHeading(midWayPose);
+
+        for (int i = 1; i <= coneAmt; i++) {
+            // Workaround to prevent error from variable having to be final
+            int currentCone = i;
+            tmpTrj = tmpTrj
+                    .lineToLinearHeading(pickConePose)
+                    .addDisplacementMarker(() -> pickCone(currentCone))
+                    .lineToLinearHeading(midWayPose)
+                    .lineToLinearHeading(dropConePose)
+                    .addDisplacementMarker(() -> dropCone(currentCone))
+                    .lineToLinearHeading(midWayPose);
         }
 
-        //Drop Preloaded Cone, Pick 5 cones and park
-        trajectoryAuto = drive.trajectorySequenceBuilder(poses.get(0))
-                //.lineToLinearHeading(midWayPose)
-                //Uncomment following line to slow down turn if needed.
-                //.setVelConstraint(getVelocityConstraint(30 /* Slower Velocity*/, 15 /*Slower Angular Velocity*/, TRACK_WIDTH))
-                .lineToLinearHeading(poses.get(1))
-                .lineToLinearHeading(poses.get(2))
-                .addDisplacementMarker(() -> {
-                    dropCone(0); //Drop preloaded Cone
-                })
-                //Uncomment following line to stop reduction in speed. And move to the position after which you want to stop reducing speed.
-                //.resetVelConstraint()
-                .lineToLinearHeading(poses.get(3))
-                .lineToLinearHeading(poses.get(4))
-                .lineToLinearHeading(poses.get(5))
-                .addDisplacementMarker(() -> {
-                    pickCone(1); //Pick top cone from stack
-                })
-                .lineToLinearHeading(poses.get(4))
-                .lineToLinearHeading(poses.get(6))
-                .addDisplacementMarker(() -> {
-                    dropCone(1); //Drop cone on junction
-                })
-                .lineToLinearHeading(poses.get(4))
-                .lineToLinearHeading(poses.get(5))
-                .addDisplacementMarker(() -> {
-                    pickCone(2); //Pick second cone from stack
-                })
-                .lineToLinearHeading(poses.get(4))
-                .lineToLinearHeading(poses.get(6))
-                .addDisplacementMarker(() -> {
-                    dropCone(2); //Drop cone on junction
-                })
-                .lineToLinearHeading(poses.get(4))
+        trajectoryAuto = tmpTrj
                 .lineToLinearHeading(parkPose)
                 .build();
     }
@@ -106,26 +79,26 @@ public class MeepMeepTesting {
                 switch (parkingSpot) {
                     case 1:
                         parkPose = new Pose2d(0.5 * tile, -halfTile - 2, Math.toRadians(270));
-                        break; // Location 1
+                        break;
                     case 2:
                         parkPose = new Pose2d(1.5 * tile, -halfTile - 2, Math.toRadians(270));
-                        break; // Location 2
+                        break;
                     case 3:
                         parkPose = new Pose2d(2.5 * tile - 4, -halfTile - 2, Math.toRadians(270));
-                        break; // Location 3
+                        break;
                 }
                 break;
             case LEFT:
                 switch (parkingSpot) {
                     case 1:
                         parkPose = new Pose2d(-2.5 * tile + 4, -halfTile - 2, Math.toRadians(270));
-                        break; // Location 1
+                        break;
                     case 2:
                         parkPose = new Pose2d(-1.5 * tile, -halfTile - 2, Math.toRadians(270));
-                        break; // Location 2
+                        break;
                     case 3:
                         parkPose = new Pose2d(-0.5 * tile, -halfTile - 2, Math.toRadians(270));
-                        break; // Location 3
+                        break;
                 }
                 break;
         }
@@ -152,7 +125,6 @@ public class MeepMeepTesting {
     }
 
     public static void dropCone(int coneCount) {
-        /*TODO: Add code to drop cone on junction*/
         if (coneCount == 0) {
             //System.out.println("Dropped Cone: Pre-loaded");
         } else {
@@ -161,7 +133,6 @@ public class MeepMeepTesting {
     }
 
     public static void pickCone(int coneCount) {
-        /*TODO: Add code to pick Cone 1 from stack*/
         //System.out.println(String.format("Picked Cone: Stack %d", coneCount));
     }
 }

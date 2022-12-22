@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.samples.tests;
+package org.firstinspires.ftc.teamcode.samples.tests;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -13,8 +13,8 @@ import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.internal.system.Misc;
-import org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain.MecanumBase;
-import org.firstinspires.ftc.teamcode.drive.samples.subsystems.StandardTrackingWheelLocalizer;
+import org.firstinspires.ftc.teamcode.subsystems.drivetrain.MecanumBase;
+import org.firstinspires.ftc.teamcode.samples.subsystems.StandardTrackingWheelLocalizer;
 
 /**
  * This routine determines the effective forward offset for the lateral tracking wheel.

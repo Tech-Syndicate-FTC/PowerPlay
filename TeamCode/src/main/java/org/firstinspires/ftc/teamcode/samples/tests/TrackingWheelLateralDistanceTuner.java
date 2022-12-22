@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.samples.tests;
+package org.firstinspires.ftc.teamcode.samples.tests;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -8,8 +8,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.RobotLog;
 
-import org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain.MecanumBase;
-import org.firstinspires.ftc.teamcode.drive.samples.subsystems.StandardTrackingWheelLocalizer;
+import org.firstinspires.ftc.teamcode.subsystems.drivetrain.MecanumBase;
+import org.firstinspires.ftc.teamcode.samples.subsystems.StandardTrackingWheelLocalizer;
 
 /**
  * Opmode designed to assist the user in tuning the `StandardTrackingWheelLocalizer`'s

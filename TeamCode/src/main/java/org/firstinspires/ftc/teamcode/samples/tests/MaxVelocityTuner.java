@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.drive.samples.tests;
+package org.firstinspires.ftc.teamcode.samples.tests;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
@@ -12,8 +12,8 @@ import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.drive.DriveConstants;
-import org.firstinspires.ftc.teamcode.drive.subsystems.drivetrain.MecanumBase;
+import org.firstinspires.ftc.teamcode.DriveConstants;
+import org.firstinspires.ftc.teamcode.subsystems.drivetrain.MecanumBase;
 
 import java.util.Objects;
 
