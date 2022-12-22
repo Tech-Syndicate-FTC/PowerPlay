@@ -1,9 +1,9 @@
 # Tech Syndicate Team #21233
 Members:
-    -Karim Ali: Leader
-    -Adrian Garcia-Tovar: Lead Coder
-    -Tito Ali: Builder
-    -Jelly: tbh idk
+- Karim Ali: Leader
+- Adrian Garcia-Tovar: Lead Coder
+- Tito Ali: Builder
+- Jelly: tbh idk
 
 ## TeamCode Module
 
