@@ -1,23 +1,29 @@
-package com.example.meepmeeptesting;
+package org.firstinspires.ftc.teamcode.opmodes.auto;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
-import com.noahbres.meepmeep.MeepMeep;
-import com.noahbres.meepmeep.roadrunner.DefaultBotBuilder;
-import com.noahbres.meepmeep.roadrunner.DriveShim;
-import com.noahbres.meepmeep.roadrunner.entity.RoadRunnerBotEntity;
-import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequence;
-import com.noahbres.meepmeep.roadrunner.trajectorysequence.TrajectorySequenceBuilder;
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-public class MeepMeepTesting {
+import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequence;
+import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuilder;
 
-    static int parkingSpot = 1;
+@Autonomous(name = "Test Autonomous", group = "Autonomous")
+public class TestAuto extends LinearOpMode {
+    DriveTrain driveTrain;
+    Telemetry telemetry;
+
+    public int parkingSpot = 1;
 
     public enum START_POSITION {
         LEFT,
         RIGHT,
     }
 
-    public static START_POSITION startPosition = START_POSITION.LEFT;
+    public START_POSITION startPosition = START_POSITION.LEFT;
 
     static TrajectorySequence trajectoryAuto;
 
@@ -25,16 +31,16 @@ public class MeepMeepTesting {
     static double halfTile = tile / 2;
 
     //Initialize any other Pose2d's as desired
-    static Pose2d initPose = relativePose(1.5 * tile, -2.5 * tile, 90);
-    static Pose2d avoidSignalPose = relativePose(0.5 * tile, -2.5 * tile, 90);
-    static Pose2d dropPreloadedConePose = relativePose(0.5 * tile, -tile, 180);
-    static Pose2d postPreloadedDropPose = relativePose(halfTile, -halfTile, 90);
-    static Pose2d pickConePose = relativePose(2.5 * tile - 4, -halfTile, 0);
-    static Pose2d midWayPose = relativePose(1.5 * tile, -halfTile, 90);
-    static Pose2d dropConePose = relativePose(32, -8, 135);
-    static Pose2d parkPose;
+    Pose2d initPose = relativePose(1.5 * tile, -2.5 * tile, 90);
+    Pose2d avoidSignalPose = relativePose(0.5 * tile, -2.5 * tile, 90);
+    Pose2d dropPreloadedConePose = relativePose(0.5 * tile, -tile, 180);
+    Pose2d postPreloadedDropPose = relativePose(halfTile, -halfTile, 90);
+    Pose2d pickConePose = relativePose(2.5 * tile - 4, -halfTile, 0);
+    Pose2d midWayPose = relativePose(1.5 * tile, -halfTile, 90);
+    Pose2d dropConePose = relativePose(32, -8, 135);
+    Pose2d parkPose;
 
-    public static Pose2d relativePose(double x, double y, double heading) {
+    public Pose2d relativePose(double x, double y, double heading) {
         if (startPosition == START_POSITION.LEFT) {
             x = -x;
             heading = 180 - heading;
@@ -43,12 +49,12 @@ public class MeepMeepTesting {
     }
 
     //Set all position based on selected staring location and Build Autonomous Trajectory
-    public static void buildAuto(DriveShim drive) {
+    public void buildAuto() {
         int coneAmt = 3;
 
         buildParking();
 
-        TrajectorySequenceBuilder tmpTrj = drive.trajectorySequenceBuilder(initPose)
+        TrajectorySequenceBuilder tmpTrj = driveTrain.trajectorySequenceBuilder(initPose)
                 .lineToLinearHeading(avoidSignalPose)
                 .lineToLinearHeading(dropPreloadedConePose)
                 .addDisplacementMarker(() -> dropCone(0))
@@ -72,7 +78,7 @@ public class MeepMeepTesting {
                 .build();
     }
 
-    public static void buildParking() {
+    public void buildParking() {
         switch (startPosition) {
             case RIGHT:
                 switch (parkingSpot) {
@@ -103,35 +109,41 @@ public class MeepMeepTesting {
         }
     }
 
-    public static void dropCone(int coneCount) {
-        if (coneCount == 0) {
-            //System.out.println("Dropped Cone: Pre-loaded");
-        } else {
-            //System.out.println(String.format("Dropped Cone: Stack %d", coneCount));
+    @Override
+    public void runOpMode() throws InterruptedException {
+        telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+
+        driveTrain = new DriveTrain(hardwareMap);
+
+        if (opModeIsActive() && !isStopRequested()) {
+            //Build parking trajectory based on last detected target by vision
+            buildAuto();
+            driveTrain.followTrajectorySequence(trajectoryAuto);
         }
+
+        //Trajectory is completed, display Parking complete
+        parkingComplete();
     }
 
-    public static void pickCone(int coneCount) {
-        //System.out.println(String.format("Picked Cone: Stack %d", coneCount));
+    public void parkingComplete(){
+        telemetry.addData("Parked in Location", parkingSpot);
+        telemetry.update();
     }
 
-    public static void main(String[] args) {
-        System.setProperty("sun.java2d.opengl", "true");
-        MeepMeep meepMeep = new MeepMeep(800);
+    public void pickCone(int coneCount) {
+        /*TODO: Add code to pick Cone 1 from stack*/
+        telemetry.addData("Picked Cone: Stack", coneCount);
+        telemetry.update();
+    }
 
-
-        RoadRunnerBotEntity myBot = new DefaultBotBuilder(meepMeep)
-                // Set bot constraints: maxVel, maxAccel, maxAngVel, maxAngAccel, track width
-                .setConstraints(60, 60, Math.toRadians(180), Math.toRadians(180), 14)
-                .followTrajectorySequence(drive -> {
-                    buildAuto(drive);
-                    return trajectoryAuto;
-                });
-
-        meepMeep.setBackground(MeepMeep.Background.FIELD_POWERPLAY_OFFICIAL)
-                .setDarkMode(true)
-                .setBackgroundAlpha(0.95f)
-                .addEntity(myBot)
-                .start();
+    //Write a method which is able to drop the cone depending on your subsystems
+    public void dropCone(int coneCount){
+        /*TODO: Add code to drop cone on junction*/
+        if (coneCount == 0) {
+            telemetry.addData("Dropped Cone", "Pre-loaded");
+        } else {
+            telemetry.addData("Dropped Cone: Stack", coneCount);
+        }
+        telemetry.update();
     }
 }

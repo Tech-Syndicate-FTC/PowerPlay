@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.IDLE;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.IDLE;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+
+import org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState;
 
 public class SharedStates {
     /**

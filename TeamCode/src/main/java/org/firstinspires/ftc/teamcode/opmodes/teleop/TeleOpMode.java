@@ -1,10 +1,14 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
+
+import java.util.Locale;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -29,12 +33,13 @@ public class TeleOpMode extends LinearOpMode {
         waitForStart();
 
         while (!isStopRequested()) {
-            /*
+
             drive.driveType = DriveTrain.DriveType.ROBOT_CENTRIC;
             gamepad = gamepad1;
-            drive.gamepadInput = new Vector2d(-gamepad.left_stick_y, -gamepad.left_stick_x);
-            drive.gamepadInputTurn = -gamepad.right_stick_x;
+            drive.gamepadInput = new Vector2d(-gamepad.left_stick_y, gamepad.left_stick_x);
+            drive.gamepadInputTurn = gamepad.right_stick_x;
 
+            /*
             if (gamepad.right_trigger > 0.25) {
                 drive.arm.closeClawManual();
             }
@@ -49,6 +54,7 @@ public class TeleOpMode extends LinearOpMode {
             } else if (gamepad.a) {
                 drive.elevator.slide(Elevator.Direction.DOWN,1);
             }
+            */
 
             drive.driveTrainPointFieldModes();
             drive.update();
@@ -57,11 +63,11 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("x", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getX()));
             telemetry.addData("y", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getY()));
             telemetry.addData("heading", String.format(Locale.ENGLISH, "%3.2f°", poseEstimate.getHeading()));
-            telemetry.addData("claw", String.format(Locale.ENGLISH, "%3.0f", drive.arm.getClawPosition()));
-            telemetry.addData("slide", String.format(Locale.ENGLISH, "%1.0f", drive.arm.getSlidePower()));
-            telemetry.addData("slide_pos", drive.arm.getSlidePosition());
+            //telemetry.addData("claw", String.format(Locale.ENGLISH, "%3.0f", drive.arm.getClawPosition()));
+            //telemetry.addData("slide", String.format(Locale.ENGLISH, "%1.0f", drive.arm.getSlidePower()));
+            ///telemetry.addData("slide_pos", drive.arm.getSlidePosition());
             telemetry.update();
-            */
+
         }
     }
 }

@@ -1,3 +1,13 @@
+# Tech Syndicate Team #21233
+Members:
+
+| Member              | Position   |
+|---------------------|------------|
+| Karim Ali           | Leader     |
+| Adrian Garcia-Tovar | Lead Coder |
+| Tito Ali            | Builder    |
+| Jelly               | tbh idk    |
+
 # Road Runner Quickstart
 
 An example FTC project using [Road Runner](https://github.com/acmerobotics/road-runner). **Note:** Road Runner is in alpha and many of its APIs are incubating.

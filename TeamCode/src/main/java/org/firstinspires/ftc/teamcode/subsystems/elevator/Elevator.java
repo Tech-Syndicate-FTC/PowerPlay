@@ -1,19 +1,19 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.subsystems.elevator;
 
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.AUTO_GRAB;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.AUTO_RELEASE;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.FLIPPING_UP;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.GOING_HOME_OPEN;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.HOME_CLOSED;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.HOME_OPEN;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.HOMING;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.IDLE;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.IN_POSITION_CLOSED;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.IN_POSITION_OPEN;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.MOVING_CLOSED;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.MOVING_OPEN;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.RELEASING;
-import static org.firstinspires.ftc.teamcode.subsystems.ElevatorState.WAITING_TO_MOVE;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.AUTO_GRAB;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.AUTO_RELEASE;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.FLIPPING_UP;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.GOING_HOME_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.HOME_CLOSED;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.HOME_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.HOMING;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.IDLE;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.IN_POSITION_CLOSED;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.IN_POSITION_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.MOVING_CLOSED;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.MOVING_OPEN;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.RELEASING;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.WAITING_TO_MOVE;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -22,6 +22,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.teamcode.subsystems.SharedStates;
 
 import java.util.Arrays;
 import java.util.List;
@@ -105,7 +107,7 @@ public class Elevator {
         // Attach to hardware devices
         myOpMode = opMode;
         isAutonomous = isAuto;
-        liftMotor = myOpMode.hardwareMap.get(DcMotorEx.class, "lift");
+        liftMotor = myOpMode.hardwareMap.get(DcMotorEx.class, "Slide");
         hand = myOpMode.hardwareMap.get(Servo.class, "claw");
         motors = Arrays.asList(liftMotor);
 

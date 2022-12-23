@@ -18,13 +18,13 @@ import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
 @Autonomous(name = "Testing Autonomous v1", group = "Autonomous")
 public class AutoOpMode extends LinearOpMode {
     public DriveTrain drive;
-    public static double DISTANCE = 20; // in
+    public static double DISTANCE = 24; // in
 
     @Override
     public void runOpMode() throws InterruptedException {
         Telemetry telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
-        DriveTrain drive = new DriveTrain(hardwareMap);
+        drive = new DriveTrain(hardwareMap);
 
         Trajectory trajectory = drive.trajectoryBuilder(new Pose2d())
                 .forward(DISTANCE)

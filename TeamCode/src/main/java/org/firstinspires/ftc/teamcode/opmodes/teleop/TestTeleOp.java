@@ -6,8 +6,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
-import org.firstinspires.ftc.teamcode.subsystems.Elevator;
-import org.firstinspires.ftc.teamcode.subsystems.ElevatorState;
+import org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator;
+import org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState;
 import org.firstinspires.ftc.teamcode.subsystems.HubPerformance;
 import org.firstinspires.ftc.teamcode.subsystems.SharedStates;
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;

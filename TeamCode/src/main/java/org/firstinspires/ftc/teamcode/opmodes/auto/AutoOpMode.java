@@ -200,7 +200,7 @@ public class AutoOpMode extends LinearOpMode{
         telemetry.addData("---------------------------------------","");
         telemetry.update();
         //Run the trajectory built for Auto and Parking
-        driveTrain.followTrajectorySequence(trajectoryAuto);
+        
         driveTrain.followTrajectorySequence(trajectoryParking);
     }
 
