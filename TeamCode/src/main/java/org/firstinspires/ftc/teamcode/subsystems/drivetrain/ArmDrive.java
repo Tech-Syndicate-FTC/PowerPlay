@@ -19,7 +19,7 @@ public class ArmDrive {
     static final double SLIDE_POWER_UP = 0.7;
     static final double SLIDE_POWER_DOWN = 0.5;
     static final double SLIDE_POWER_REST = 0.1;
-    static final double SLIDE_INCREMENT = 100;
+    static final double SLIDE_INCREMENT = 60;
     private int slidePosition = 0;
     private double slidePower = 0;
 

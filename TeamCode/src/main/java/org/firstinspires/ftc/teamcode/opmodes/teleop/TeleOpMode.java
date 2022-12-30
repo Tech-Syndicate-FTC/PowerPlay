@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
+import org.firstinspires.ftc.teamcode.subsystems.drivetrain.ArmDrive;
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
 
 import java.util.Locale;
@@ -25,6 +26,7 @@ public class TeleOpMode extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         DriveTrain drive = new DriveTrain(hardwareMap);
+        ArmDrive arm = new ArmDrive(hardwareMap);
 
         //drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         telemetry.clearAll();
@@ -36,28 +38,30 @@ public class TeleOpMode extends LinearOpMode {
 
             drive.driveType = DriveTrain.DriveType.ROBOT_CENTRIC;
             gamepad = gamepad1;
-            drive.gamepadInput = new Vector2d(-gamepad.left_stick_y, gamepad.left_stick_x);
-            drive.gamepadInputTurn = gamepad.right_stick_x;
+            drive.gamepadInput = new Vector2d(-gamepad.left_stick_y, -gamepad.left_stick_x);
+            drive.gamepadInputTurn = -gamepad.right_stick_x;
 
-            /*
+
             if (gamepad.right_trigger > 0.25) {
-                drive.arm.closeClawManual();
+                arm.closeClawManual();
             }
 
             if (gamepad.left_trigger > 0.25) {
-                drive.arm.openClawManual();
+                arm.openClawManual();
             }
 
             if (gamepad.y) {
-                drive.arm.slideUp();
-                drive.elevator.slide(Elevator.Direction.UP,1);
+                arm.slideUp();
+                //drive.elevator.slide(Elevator.Direction.UP,1);
             } else if (gamepad.a) {
-                drive.elevator.slide(Elevator.Direction.DOWN,1);
+                arm.slideDown();
+                //drive.elevator.slide(Elevator.Direction.DOWN,1);
             }
-            */
+
 
             drive.driveTrainPointFieldModes();
             drive.update();
+            arm.update();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
             telemetry.addData("x", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getX()));
@@ -65,7 +69,7 @@ public class TeleOpMode extends LinearOpMode {
             telemetry.addData("heading", String.format(Locale.ENGLISH, "%3.2f°", poseEstimate.getHeading()));
             //telemetry.addData("claw", String.format(Locale.ENGLISH, "%3.0f", drive.arm.getClawPosition()));
             //telemetry.addData("slide", String.format(Locale.ENGLISH, "%1.0f", drive.arm.getSlidePower()));
-            ///telemetry.addData("slide_pos", drive.arm.getSlidePosition());
+            telemetry.addData("slide_pos", arm.getSlidePosition());
             telemetry.update();
 
         }

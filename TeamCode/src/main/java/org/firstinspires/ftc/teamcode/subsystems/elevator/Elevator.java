@@ -31,24 +31,25 @@ import java.util.List;
 public class Elevator {
     // Ticks per inch calculation (537.7*8.7)/38.4=128.8
     private static final double TICKS_PER_IN = 128.8;
-    private static final double HEIGHT_OFF_GROUND = 0;//5;//2.5;
+    private static final double HEIGHT_OFF_GROUND = 2.5;//5;//2.5;
 
     final boolean DROP_ON_HOME = true;
-    final double HOME_POWER = -0.1;
+    final double HOME_POWER = -0.5;
 
     public final static int ELEVATOR_MIN = 0;
-    public final static int ELEVATOR_HOME = inchesToTicks(2);//60;
-    public final static int ELEVATOR_STACK_TOP = inchesToTicks(7);//821;//190;
-    public final static int ELEVATOR_LOW = inchesToTicks(10);//460;
-    public final static int ELEVATOR_MID = inchesToTicks(20);//710;
-    public final static int ELEVATOR_HIGH = inchesToTicks(30);//1000;
-    public final static int ELEVATOR_MAX = inchesToTicks(35);//4677;//1100;
+    public final static int ELEVATOR_HOME = inchesToTicks(2.5);
+    public final static int ELEVATOR_STACK_TOP = inchesToTicks(6.5);
+    public final static int ELEVATOR_LOW = inchesToTicks(12);
+    public final static int ELEVATOR_MID = inchesToTicks(19);
+    public final static int ELEVATOR_HIGH = inchesToTicks(26);
+    public final static int ELEVATOR_MAX = inchesToTicks(35);
 
-    final static int ELEVATOR_COUNTS_PER_CONE = inchesToTicks(1);//30;
-    final static int ELEVATOR_RELEASE_DROP = inchesToTicks(2);//150;
+    final static int ELEVATOR_COUNTS_PER_CONE = inchesToTicks(1);
+    final static int ELEVATOR_RELEASE_DROP = inchesToTicks(5);
 
-    final static int ELEVATOR_TOP_LEVEL = 4;
+    final static int ELEVATOR_TOP_LEVEL = 5;
     final static int elevatorLevel[] = {
+            Elevator.ELEVATOR_MIN,
             Elevator.ELEVATOR_HOME,
             Elevator.ELEVATOR_STACK_TOP,
             Elevator.ELEVATOR_LOW,
@@ -56,19 +57,19 @@ public class Elevator {
             Elevator.ELEVATOR_HIGH
     };
 
-    final int DEAD_BAND = 5;
-    final double FAST_LIFT = 0.5;
-    final double SLOW_LIFT = 0.3;
+    final int DEAD_BAND = 20;
+    final double FAST_LIFT = 1;
+    final double SLOW_LIFT = 0.5;
     final double SLOW_LOWER = 0.0;
-    final double FAST_LOWER = -0.05;
+    final double FAST_LOWER = -0.5;
     final double HOLD_POWER = 0.05;
     final double IN_POSITION_LIMIT = 15;
 
     final double HAND_HOME_POSITION = 0.3;
 
-    final double HAND_OPEN = 0.3;
-    final double HAND_READY = 0.4;
-    final double HAND_CLOSE = 0.5;
+    public final double HAND_OPEN = 0.3;
+    public final double HAND_READY = 0.4;
+    public final double HAND_CLOSE = 0.5;
 
     private DcMotorEx liftMotor;
     private List<DcMotorEx> motors;
@@ -417,7 +418,7 @@ public class Elevator {
         setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         myOpMode.sleep(50);
         setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        setLiftTargetPosition(0);
+        setLiftTargetPosition(ELEVATOR_HOME);
         currentElevatorLevel = 0;
         newLevelReqested = false;
         enableLift();  // Start closed loop control
@@ -476,7 +477,7 @@ public class Elevator {
 
     // called from AUTO to grab cone and raise to drop on low junction
     public void autoGrab() {
-        setHandDelayMove(HAND_CLOSE, 0.3, ELEVATOR_LOW, AUTO_GRAB);
+        setHandDelayMove(HAND_CLOSE, 0.3, liftMotor.getCurrentPosition() + ELEVATOR_RELEASE_DROP, AUTO_GRAB);//ELEVATOR_LOW, AUTO_GRAB);
     }
 
     public boolean sequenceComplete() {
@@ -531,6 +532,10 @@ public class Elevator {
 
     public int getLiftPosition() {
         return liftPosition;
+    }
+
+    public int getLiftRawPosition() {
+        return liftMotor.getCurrentPosition();
     }
 
     public boolean getWristIsSafe() {

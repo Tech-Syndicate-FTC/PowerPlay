@@ -78,8 +78,8 @@ public class TestTeleOp extends LinearOpMode {
             } else if (gamepad.a) {
             }*/
 
-            boolean stepUp = gamepad.dpad_up;
-            boolean stepDown = gamepad.dpad_down;
+            boolean stepUp = gamepad.y;
+            boolean stepDown = gamepad.a;
             boolean newPosition = false;
 
             // reset Home on Elevator
@@ -96,8 +96,26 @@ public class TestTeleOp extends LinearOpMode {
                 elevator.levelDown();
             }
 
-            lastStepUp   = stepUp;
+            lastStepUp = stepUp;
             lastStepDown = stepDown;
+
+            if (gamepad.b) {
+                elevator.autoGrab();
+            }
+
+            if (gamepad.x) {
+                elevator.autoRelease();
+            }
+
+            if (gamepad.right_trigger > 0.5) {
+                elevator.setHandPosition(elevator.HAND_CLOSE);
+                elevator.setState(ElevatorState.IN_POSITION_CLOSED);
+            }
+
+            if (gamepad.left_trigger > 0.5) {
+                elevator.setHandPosition(elevator.HAND_OPEN);
+                elevator.setState(ElevatorState.IN_POSITION_OPEN);
+            }
 
             // Manually jog the elevator.
             //elevator.jogElevator(-gamepad2.left_stick_y);
@@ -118,6 +136,8 @@ public class TestTeleOp extends LinearOpMode {
             telemetry.addData("x", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getX()));
             telemetry.addData("y", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getY()));
             telemetry.addData("heading", String.format(Locale.ENGLISH, "%3.2f°", poseEstimate.getHeading()));
+            telemetry.addData("GYRO heading", Math.toDegrees(drive.getExternalHeading()));
+            //telemetry.addData("Slide Pos", elevator.getLiftRawPosition());
             //telemetry.addData("claw", String.format(Locale.ENGLISH, "%3.0f", drive.arm.getClawPosition()));
             //telemetry.addData("slide", String.format(Locale.ENGLISH, "%1.0f", drive.arm.getSlidePower()));
             //telemetry.addData("slide_pos", drive.arm.getSlidePosition());

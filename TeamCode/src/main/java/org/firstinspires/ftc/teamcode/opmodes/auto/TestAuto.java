@@ -5,6 +5,7 @@ import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
@@ -14,7 +15,8 @@ import org.firstinspires.ftc.teamcode.trajectorysequence.TrajectorySequenceBuild
 @Autonomous(name = "Test Autonomous", group = "Autonomous")
 public class TestAuto extends LinearOpMode {
     DriveTrain driveTrain;
-    Telemetry telemetry;
+    //Telemetry telemetry;
+    ElapsedTime runTime;
 
     public int parkingSpot = 1;
 
@@ -23,7 +25,7 @@ public class TestAuto extends LinearOpMode {
         RIGHT,
     }
 
-    public START_POSITION startPosition = START_POSITION.LEFT;
+    public START_POSITION startPosition = START_POSITION.RIGHT;
 
     static TrajectorySequence trajectoryAuto;
 
@@ -33,11 +35,11 @@ public class TestAuto extends LinearOpMode {
     //Initialize any other Pose2d's as desired
     Pose2d initPose = relativePose(1.5 * tile, -2.5 * tile, 90);
     Pose2d avoidSignalPose = relativePose(0.5 * tile, -2.5 * tile, 90);
-    Pose2d dropPreloadedConePose = relativePose(0.5 * tile, -tile, 180);
-    Pose2d postPreloadedDropPose = relativePose(halfTile, -halfTile, 90);
-    Pose2d pickConePose = relativePose(2.5 * tile - 4, -halfTile, 0);
-    Pose2d midWayPose = relativePose(1.5 * tile, -halfTile, 90);
-    Pose2d dropConePose = relativePose(32, -8, 135);
+    Pose2d dropPreloadedConePose = relativePose(0.5 * tile, -tile, 90);
+    Pose2d postPreloadedDropPose = relativePose(halfTile - 3, -halfTile, 90);
+    Pose2d pickConePose = relativePose(2.5 * tile - 7, -halfTile + 1, 0);
+    Pose2d midWayPose = relativePose(1.5 * tile - 3, -halfTile, 90);
+    Pose2d dropConePose = relativePose(1.5 * tile - 4, -halfTile + 6, 135);
     Pose2d parkPose;
 
     public Pose2d relativePose(double x, double y, double heading) {
@@ -50,7 +52,7 @@ public class TestAuto extends LinearOpMode {
 
     //Set all position based on selected staring location and Build Autonomous Trajectory
     public void buildAuto() {
-        int coneAmt = 3;
+        int coneAmt = 1;
 
         buildParking();
 
@@ -66,9 +68,11 @@ public class TestAuto extends LinearOpMode {
             int currentCone = i;
             tmpTrj = tmpTrj
                     .lineToLinearHeading(pickConePose)
+                    .waitSeconds(1)
                     .addDisplacementMarker(() -> pickCone(currentCone))
                     .lineToLinearHeading(midWayPose)
                     .lineToLinearHeading(dropConePose)
+                    .waitSeconds(1)
                     .addDisplacementMarker(() -> dropCone(currentCone))
                     .lineToLinearHeading(midWayPose);
         }
@@ -111,22 +115,27 @@ public class TestAuto extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
+        //telemetry = new MultipleTelemetry(this.telemetry, FtcDashboard.getInstance().getTelemetry());
 
         driveTrain = new DriveTrain(hardwareMap);
 
-        if (opModeIsActive() && !isStopRequested()) {
-            //Build parking trajectory based on last detected target by vision
-            buildAuto();
-            driveTrain.followTrajectorySequence(trajectoryAuto);
-        }
+        waitForStart();
+
+        //if (opModeIsActive() && !isStopRequested()) {
+        //Build parking trajectory based on last detected target by vision
+        runTime = new ElapsedTime();
+        buildAuto();
+        driveTrain.getLocalizer().setPoseEstimate(initPose);
+        driveTrain.followTrajectorySequence(trajectoryAuto);
+        //}
 
         //Trajectory is completed, display Parking complete
         parkingComplete();
     }
 
-    public void parkingComplete(){
+    public void parkingComplete() {
         telemetry.addData("Parked in Location", parkingSpot);
+        telemetry.addData("Run Time:", runTime.seconds());
         telemetry.update();
     }
 
@@ -137,7 +146,7 @@ public class TestAuto extends LinearOpMode {
     }
 
     //Write a method which is able to drop the cone depending on your subsystems
-    public void dropCone(int coneCount){
+    public void dropCone(int coneCount) {
         /*TODO: Add code to drop cone on junction*/
         if (coneCount == 0) {
             telemetry.addData("Dropped Cone", "Pre-loaded");
