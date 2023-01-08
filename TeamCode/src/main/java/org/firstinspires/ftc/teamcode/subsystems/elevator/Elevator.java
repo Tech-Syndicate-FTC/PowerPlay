@@ -45,7 +45,7 @@ public class Elevator {
     public final static int ELEVATOR_MAX = inchesToTicks(35);
 
     final static int ELEVATOR_COUNTS_PER_CONE = inchesToTicks(1);
-    final static int ELEVATOR_RELEASE_DROP = inchesToTicks(5);
+    final static int ELEVATOR_RELEASE_DROP = inchesToTicks(7);
 
     final static int ELEVATOR_TOP_LEVEL = 5;
     final static int elevatorLevel[] = {
@@ -57,11 +57,18 @@ public class Elevator {
             Elevator.ELEVATOR_HIGH
     };
 
+    public enum Junctions {
+        Ground,
+        Low,
+        Medium,
+        High
+    }
+
     final int DEAD_BAND = 20;
     final double FAST_LIFT = 1;
-    final double SLOW_LIFT = 0.5;
-    final double SLOW_LOWER = 0.0;
-    final double FAST_LOWER = -0.5;
+    final double SLOW_LIFT = 0.8;
+    final double SLOW_LOWER = 0.2;
+    final double FAST_LOWER = -0.8;
     final double HOLD_POWER = 0.05;
     final double IN_POSITION_LIMIT = 15;
 
@@ -91,7 +98,7 @@ public class Elevator {
     private int liftLastPosition = 0;
     private boolean wristIsSafe = false;
 
-    private boolean newLevelReqested = false;
+    public boolean newLevelRequested = false;
     private int requestedPosition;
     private double pendingDelay;
     private int pendingLiftPosition;
@@ -119,7 +126,7 @@ public class Elevator {
         setHandPosition(HAND_HOME_POSITION);
 
         currentElevatorLevel = 0;
-        newLevelReqested = false;
+        newLevelRequested = false;
         elevatorState = SharedStates.elevatorState;
 
         // do any grabber required initializations
@@ -264,7 +271,8 @@ public class Elevator {
             case AUTO_RELEASE: {
                 if (liftInPosition) {
                     setHandPosition(HAND_OPEN);
-                    setState(RELEASING);
+                    //setState(RELEASING);
+                    setState(IN_POSITION_OPEN);
                 }
                 break;
             }
@@ -280,17 +288,17 @@ public class Elevator {
             case FLIPPING_UP: {
                 if (elevatorStateTimer.time() > 0.25) {
                     setLiftTargetPosition(getStackHeight());
-                    //terminateSequence = true;  // signal to auto to stop waiting for drop;
+                    terminateSequence = true;  // signal to auto to stop waiting for drop;
                     setState(IN_POSITION_OPEN);
                 }
                 break;
             }
 
             case AUTO_GRAB: {
-                if (liftInPosition) {
-                    terminateSequence = true;  // signal to auto to stop waiting for grab;
-                    setState(IN_POSITION_CLOSED);
-                }
+                //if (liftInPosition) {
+                terminateSequence = true;  // signal to auto to stop waiting for grab;
+                setState(IN_POSITION_CLOSED);
+                //}
                 break;
             }
 
@@ -414,19 +422,21 @@ public class Elevator {
             myOpMode.sleep(100);
         }
 
+        myOpMode.sleep(250);
+
         setPower(0);
         setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         myOpMode.sleep(50);
         setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         setLiftTargetPosition(ELEVATOR_HOME);
         currentElevatorLevel = 0;
-        newLevelReqested = false;
+        newLevelRequested = false;
         enableLift();  // Start closed loop control
     }
 
     private boolean newLiftPosition() {
-        if (newLevelReqested) {
-            newLevelReqested = false;
+        if (newLevelRequested) {
+            newLevelRequested = false;
             return true;
         } else {
             return false;
@@ -456,7 +466,37 @@ public class Elevator {
         if (currentElevatorLevel == 1) {
             dropStackHeight();
         }
-        newLevelReqested = true;
+        newLevelRequested = true;
+    }
+
+    public void setLevel(Junctions junction) {
+        int newLevel = 0;
+        switch (junction) {
+            case Ground:
+                newLevel = ELEVATOR_MIN;
+                break;
+            case Low:
+                newLevel = ELEVATOR_LOW;
+                break;
+            case Medium:
+                newLevel = ELEVATOR_MID;
+                break;
+            case High:
+                newLevel = ELEVATOR_HIGH;
+                break;
+        }
+        requestedPosition = newLevel;
+        newLevelRequested = true;
+    }
+
+    public void openClaw() {
+        setHandPosition(HAND_OPEN);
+        setState(ElevatorState.IN_POSITION_OPEN);
+    }
+
+    public void closeClaw() {
+        setHandPosition(HAND_CLOSE);
+        setState(ElevatorState.IN_POSITION_CLOSED);
     }
 
     public void levelDown() {
@@ -465,7 +505,7 @@ public class Elevator {
             currentElevatorLevel--;
         }
         requestedPosition = elevatorLevel[currentElevatorLevel];
-        newLevelReqested = true;
+        newLevelRequested = true;
     }
 
     // ===== Autonomous Features   ================================
@@ -543,7 +583,7 @@ public class Elevator {
     }
 
     public void jogElevator(double speed) {
-        setLiftTargetPosition(liftTargetPosition + (int) (speed * 7));
+        setLiftTargetPosition(liftTargetPosition + (int) (speed * 20));
     }
 
     /*

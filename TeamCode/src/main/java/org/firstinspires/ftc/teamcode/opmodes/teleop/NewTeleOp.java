@@ -4,13 +4,14 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator;
-import org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState;
 import org.firstinspires.ftc.teamcode.subsystems.HubPerformance;
 import org.firstinspires.ftc.teamcode.subsystems.SharedStates;
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
+import org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState;
 
 import java.util.Locale;
 
@@ -21,10 +22,11 @@ import java.util.Locale;
  * exercise is to ascertain whether the localizer has been configured properly (note: the pure
  * encoder localizer heading may be significantly off if the track width has not been tuned).
  */
-@TeleOp(name = "Test TeleOp", group = "Teleop")
-public class TestTeleOp extends LinearOpMode {
+@TeleOp(name = "TeleOp v2", group = "Teleop")
+public class NewTeleOp extends LinearOpMode {
     public DriveTrain drive;
-    private Gamepad gamepad;
+    private Gamepad pilot;
+    private Gamepad copilot;
     private Elevator elevator;
 
     boolean lastStepUp = false;
@@ -45,11 +47,9 @@ public class TestTeleOp extends LinearOpMode {
             drive.setExternalHeading(0);
         }
 
-        //drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        telemetry.clearAll();
-        telemetry.update();
+        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        //waitForStart();
+        // Init
 
         while (opModeInInit()) {
             elevator.runStateMachine();
@@ -59,31 +59,23 @@ public class TestTeleOp extends LinearOpMode {
 
         elevator.setLiftTargetPosition(Elevator.ELEVATOR_HOME);
 
+        // Loop
+
         while (!isStopRequested()) {
             drive.driveType = DriveTrain.DriveType.ROBOT_CENTRIC;
-            gamepad = gamepad1;
-            drive.gamepadInput = new Vector2d(-gamepad.left_stick_y, -gamepad.left_stick_x);
-            drive.gamepadInputTurn = -gamepad.right_stick_x;
+            pilot = gamepad1;
+            copilot = gamepad2;
 
-            /*if (gamepad.right_trigger > 0.25) {
-                //drive.arm.closeClawManual();
-            }
+            drive.gamepadInput = new Vector2d(-pilot.left_stick_y, -pilot.left_stick_x);
+            drive.gamepadInputTurn = -pilot.right_stick_x;
 
-            if (gamepad.left_trigger > 0.25) {
-                //drive.arm.openClawManual();
-            }
-
-            if (gamepad.y) {
-                //drive.arm.slideUp();
-            } else if (gamepad.a) {
-            }*/
-
-            boolean stepUp = gamepad.y;
-            boolean stepDown = gamepad.a;
+            // Co-pilot controls
+            boolean stepUp = copilot.dpad_up;
+            boolean stepDown = copilot.dpad_down;
             boolean newPosition = false;
 
             // reset Home on Elevator
-            if (gamepad.back && gamepad.start) {
+            if (copilot.back && copilot.start) {
                 elevator.setState(ElevatorState.IDLE);
             }
 
@@ -99,27 +91,29 @@ public class TestTeleOp extends LinearOpMode {
             lastStepUp = stepUp;
             lastStepDown = stepDown;
 
-            if (gamepad.b) {
-                elevator.autoGrab();
+            if (copilot.a) {
+                elevator.setLevel(Elevator.Junctions.Ground);
+            } else if (copilot.b) {
+                elevator.setLevel(Elevator.Junctions.Low);
+            } else if (copilot.x) {
+                elevator.setLevel(Elevator.Junctions.Medium);
+            } else if (copilot.y) {
+                elevator.setLevel(Elevator.Junctions.High);
             }
 
-            if (gamepad.x) {
-                elevator.autoRelease();
+            if (copilot.right_trigger > 0.5) {
+                elevator.closeClaw();
             }
 
-            if (gamepad.right_trigger > 0.5) {
-                elevator.setHandPosition(elevator.HAND_CLOSE);
-                elevator.setState(ElevatorState.IN_POSITION_CLOSED);
-            }
-
-            if (gamepad.left_trigger > 0.5) {
-                elevator.setHandPosition(elevator.HAND_OPEN);
-                elevator.setState(ElevatorState.IN_POSITION_OPEN);
+            if (copilot.left_trigger > 0.5) {
+                elevator.openClaw();
             }
 
             // Manually jog the elevator.
-            //elevator.jogElevator(-gamepad2.left_stick_y);
-
+            if (copilot.left_stick_y != 0) {
+                elevator.jogElevator(-copilot.left_stick_y);
+                elevator.newLevelRequested = true;
+            }
             // Display Telemetry data
             //telemetry.addData("GYRO heading", Math.toDegrees(drive.getExternalHeading()));
             //telemetry.update();
@@ -133,9 +127,9 @@ public class TestTeleOp extends LinearOpMode {
             elevator.showElevatorState();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
-            telemetry.addData("x", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getX()));
-            telemetry.addData("y", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getY()));
-            telemetry.addData("heading", String.format(Locale.ENGLISH, "%3.2f°", poseEstimate.getHeading()));
+            telemetry.addData("x", "%3.2f", poseEstimate.getX());
+            telemetry.addData("y", "%3.2f", poseEstimate.getY());
+            telemetry.addData("heading", "%3.2f°", poseEstimate.getHeading());
             telemetry.addData("GYRO heading", Math.toDegrees(drive.getExternalHeading()));
             //telemetry.addData("Slide Pos", elevator.getLiftRawPosition());
             //telemetry.addData("claw", String.format(Locale.ENGLISH, "%3.0f", drive.arm.getClawPosition()));

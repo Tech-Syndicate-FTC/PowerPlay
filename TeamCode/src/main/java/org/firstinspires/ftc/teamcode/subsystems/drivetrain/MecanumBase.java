@@ -54,13 +54,20 @@ import java.util.List;
 @Config
 public class MecanumBase extends MecanumDrive {
     private static final String[] MOTOR_NAMES = {
-            "Front R",
-            "Back R",
             "Front L",
-            "Back L"
+            "Back L",
+            "Front R",
+            "Back R"
     };
 
-    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(8, 0, 0);
+    private static enum Side {
+        RIGHT,
+        LEFT
+    }
+
+    public static Side REVERSE_SIDE = Side.RIGHT;
+
+    public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(2, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0);
 
     public static double LATERAL_MULTIPLIER = 1;
@@ -128,10 +135,22 @@ public class MecanumBase extends MecanumDrive {
         rightFront = hardwareMap.get(DcMotorEx.class, MOTOR_NAMES[2]);
         rightRear = hardwareMap.get(DcMotorEx.class, MOTOR_NAMES[3]);
 
-        rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
-        leftRear.setDirection(DcMotorSimple.Direction.FORWARD);
-        leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+        switch (REVERSE_SIDE) {
+            case RIGHT: {
+                rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
+                rightRear.setDirection(DcMotorSimple.Direction.REVERSE);
+                leftRear.setDirection(DcMotorSimple.Direction.FORWARD);
+                leftFront.setDirection(DcMotorSimple.Direction.FORWARD);
+                break;
+            }
+            case LEFT: {
+                leftRear.setDirection(DcMotorSimple.Direction.REVERSE);
+                leftFront.setDirection(DcMotorSimple.Direction.REVERSE);
+                rightFront.setDirection(DcMotorSimple.Direction.FORWARD);
+                rightRear.setDirection(DcMotorSimple.Direction.FORWARD);
+                break;
+            }
+        }
 
         motors = Arrays.asList(leftFront, leftRear, rightRear, rightFront);
 

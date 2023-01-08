@@ -25,7 +25,7 @@ public class TestAuto extends LinearOpMode {
         RIGHT,
     }
 
-    public START_POSITION startPosition = START_POSITION.RIGHT;
+    public START_POSITION startPosition = START_POSITION.LEFT;
 
     static TrajectorySequence trajectoryAuto;
 

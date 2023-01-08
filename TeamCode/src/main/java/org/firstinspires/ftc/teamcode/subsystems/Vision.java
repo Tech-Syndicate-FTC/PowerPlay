@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGR
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.ZYX;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesReference.INTRINSIC;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
@@ -16,6 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackable;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefaultListener;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
+import org.firstinspires.ftc.teamcode.DriveConstants;
 
 import java.util.concurrent.TimeUnit;
 
@@ -27,8 +29,6 @@ public class Vision {
     OpenGLMatrix targetPose = null;
     LinearOpMode myOpMode = null;
     VuforiaTrackables targetsPowerPlay = null;
-
-    public long EXPOSURE_TIME = 2;
 
     public Vision(LinearOpMode opMode) {
         myOpMode = opMode;
@@ -52,23 +52,28 @@ public class Vision {
         targetsPowerPlay = this.vuforia.loadTrackablesFromAsset("signal");
         targetsPowerPlay.get(0).setName("Signal");
 
+        setupCam((long) DriveConstants.CAMERA_EXPOSURE, DriveConstants.CAMERA_GAIN);
+
+        FtcDashboard.getInstance().startCameraStream(vuforia, 0);
+
+        // Start tracking targets in the background
+        targetsPowerPlay.activate();
+    }
+
+    public void setupCam(long exposure, int gain) {
         // Assign the exposure and gain control objects, to use their methods.
         ExposureControl myExposureControl = vuforia.getCamera().getControl(ExposureControl.class);
         GainControl myGainControl = vuforia.getCamera().getControl(GainControl.class);
-
 
         myExposureControl.setMode(ExposureControl.Mode.Manual);
         myOpMode.sleep(100);
 
         // Set initial exposure and gain.
         //myExposureControl.setExposure(10, TimeUnit.MILLISECONDS);
-        myExposureControl.setExposure(EXPOSURE_TIME, TimeUnit.MILLISECONDS);
+        myExposureControl.setExposure((long) DriveConstants.CAMERA_EXPOSURE, TimeUnit.MILLISECONDS);
         myOpMode.sleep(100);
-        myGainControl.setGain(160);
+        myGainControl.setGain(DriveConstants.CAMERA_GAIN);
         myOpMode.sleep(100);
-
-        // Start tracking targets in the background
-        targetsPowerPlay.activate();
     }
 
     public int getSignalNumber() {
@@ -101,6 +106,7 @@ public class Vision {
                         color = "Yellow";
                     }
 
+                    SharedStates.parkingSpot = imageNumber;
                     myOpMode.telemetry.addData("Parking Spot", "%d", imageNumber);
                     myOpMode.telemetry.addData("Color", color);
                     break;  // jump out of target tracking loop if we find a target.

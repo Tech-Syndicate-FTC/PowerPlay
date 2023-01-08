@@ -14,4 +14,7 @@ public class SharedStates {
      */
     public static Pose2d currentPose = null;
     public static ElevatorState elevatorState = IDLE;
+    public static int parkingSpot = 0;
+    public static int cameraGain = 160;
+    public static int cameraExposure = 20;
 }

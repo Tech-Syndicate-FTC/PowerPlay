@@ -1,4 +1,5 @@
 package org.firstinspires.ftc.teamcode;
+
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 
@@ -21,8 +22,13 @@ public class DriveConstants {
     /*
      * These are motor constants that should be listed online for your motors.
      */
-    public static final double TICKS_PER_REV = 28;
-    public static final double MAX_RPM = 6000;
+    public static final double PLANETARY_GEAR_RATIO = 20;
+    public static final double TICKS_PER_REV = 28 * PLANETARY_GEAR_RATIO;
+    public static final double MAX_RPM = 6000 / PLANETARY_GEAR_RATIO;
+
+    public static int CAMERA_EXPOSURE = 10;
+    public static int CAMERA_GAIN = 100;
+
 
     /*
      * Set RUN_USING_ENCODER to true to enable built-in hub velocity control using drive encoders.
@@ -45,8 +51,8 @@ public class DriveConstants {
      * convenience. Make sure to exclude any gear ratio included in MOTOR_CONFIG from GEAR_RATIO.
      */
     public static double WHEEL_RADIUS = 1.4763; // in
-    public static double GEAR_RATIO = 4/2.6;//26.658461538461538; // output (wheel) speed / input (motor) speed
-    public static double TRACK_WIDTH = 10.39;//14; // in
+    public static double GEAR_RATIO = 1; // output (wheel) speed / input (motor) speed
+    public static double TRACK_WIDTH = 10.39;// in
 
     /*
      * These are the feedforward parameters used to model the drive motor behavior. If you are using
@@ -54,9 +60,9 @@ public class DriveConstants {
      * motor encoders or have elected not to use them for velocity control, these values should be
      * empirically tuned.
      */
-    public static double kV = 0.02;//1.0 / rpmToVelocity(MAX_RPM);
-    public static double kA = 0;
-    public static double kStatic = 0;
+    public static double kV = 0.035;//rpmToVelocity(MAX_RPM);
+    public static double kA = 0.0002;
+    public static double kStatic = 0.07686;
 
     /*
      * These values are used to generate the trajectories for you robot. To ensure proper operation,
@@ -98,9 +104,9 @@ public class DriveConstants {
      * https://github.com/acmerobotics/road-runner-quickstart/issues/91
 
      */
-    public static double MAX_VEL = 40;
-    public static double MAX_ACCEL = 40;
-    public static double MAX_ANG_VEL = Math.toRadians(311);
+    public static double MAX_VEL = 80;
+    public static double MAX_ACCEL = 80;
+    public static double MAX_ANG_VEL = Math.toRadians(360);
     public static double MAX_ANG_ACCEL = Math.toRadians(360);
 
 

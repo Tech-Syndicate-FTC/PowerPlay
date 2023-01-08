@@ -9,7 +9,6 @@ import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.DriveConstants;
-import org.firstinspires.ftc.teamcode.opmodes.AutoOpMode;
 
 public class DriveTrain extends MecanumBase {
     public boolean FtcDashboard_FLAG = true;
@@ -27,8 +26,6 @@ public class DriveTrain extends MecanumBase {
     // Use the same gains as SampleMecanumDrive's heading controller
     //private PIDFController headingController = new PIDFController(MecanumDriveDeadWheelsEncoder.HEADING_PID);
     private PIDFController headingController = new PIDFController(MecanumBase.HEADING_PID);
-
-    AutoOpMode autoOpMode;
 
     public enum DriveType {
         ROBOT_CENTRIC,
