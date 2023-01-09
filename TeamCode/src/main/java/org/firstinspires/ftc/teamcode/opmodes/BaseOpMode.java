@@ -20,11 +20,11 @@ public class BaseOpMode {
     public LinearOpMode opMode = new LinearOpMode() {
         @Override
         public void runOpMode() throws InterruptedException {
-
+            run();
         }
     };
 
-    final public void runOpMode() throws InterruptedException {
+    final public void run() throws InterruptedException {
         opMode.runOpMode();
         telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
         hardwareMap = opMode.hardwareMap;
