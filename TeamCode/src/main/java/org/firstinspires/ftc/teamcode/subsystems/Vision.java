@@ -52,7 +52,7 @@ public class Vision {
         targetsPowerPlay = this.vuforia.loadTrackablesFromAsset("signal");
         targetsPowerPlay.get(0).setName("Signal");
 
-        setupCam((long) DriveConstants.CAMERA_EXPOSURE, DriveConstants.CAMERA_GAIN);
+        setupCam((long) SharedStates.cameraExposure, SharedStates.cameraGain);
 
         FtcDashboard.getInstance().startCameraStream(vuforia, 0);
 

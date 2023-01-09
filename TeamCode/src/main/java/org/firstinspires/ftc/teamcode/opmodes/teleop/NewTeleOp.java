@@ -8,12 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 
 import org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator;
-import org.firstinspires.ftc.teamcode.subsystems.HubPerformance;
 import org.firstinspires.ftc.teamcode.subsystems.SharedStates;
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState;
-
-import java.util.Locale;
 
 /**
  * This is a simple teleop routine for testing localization. Drive the robot around like a normal
@@ -34,8 +31,6 @@ public class NewTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        HubPerformance.enable(hardwareMap);
-
         drive = new DriveTrain(hardwareMap);
         elevator = new Elevator(this, false);
 
