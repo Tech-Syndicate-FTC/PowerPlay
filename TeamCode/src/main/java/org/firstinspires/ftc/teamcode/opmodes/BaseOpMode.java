@@ -10,59 +10,51 @@ import org.firstinspires.ftc.teamcode.helpers.gamepad.GamepadEx;
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator;
 
-public class BaseOpMode {
-    public MultipleTelemetry telemetry;
-    public HardwareMap hardwareMap;
+public abstract class BaseOpMode extends LinearOpMode{
+    public MultipleTelemetry t;
     public DriveTrain drive;
     public Elevator elevator;
     public GamepadEx pilot;
     public GamepadEx copilot;
-    public LinearOpMode opMode = new LinearOpMode() {
-        @Override
-        public void runOpMode() throws InterruptedException {
-            run();
-        }
-    };
 
-    final public void run() throws InterruptedException {
-        opMode.runOpMode();
-        telemetry = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
-        hardwareMap = opMode.hardwareMap;
-        elevator = new Elevator(opMode, false);
-        pilot = new GamepadEx(opMode.gamepad1);
-        copilot = new GamepadEx(opMode.gamepad1);
+    public void runOpMode() throws InterruptedException {
+        t = new MultipleTelemetry(telemetry, FtcDashboard.getInstance().getTelemetry());
+        elevator = new Elevator(this, false);
+        pilot = new GamepadEx(gamepad1);
+        copilot = new GamepadEx(gamepad1);
         drive = new DriveTrain(hardwareMap);
-        init();
-        while (opMode.opModeInInit()) {
-            initLoop();
+        onInit();
+        while (!isStarted()) {
+            onInitLoop();
         }
-        once();
-        while (!opMode.isStopRequested() && opMode.opModeIsActive()) {
+        waitForStart();
+        onStart();
+        while (!isStopRequested() && opModeIsActive()) {
             for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
                 module.clearBulkCache();
             }
-            pilot.poll(opMode.gamepad1);
-            copilot.poll(opMode.gamepad2);
-            loop();
+            pilot.poll(gamepad1);
+            copilot.poll(gamepad2);
+            onLoop();
             drive.update();
             elevator.update();
             elevator.runStateMachine();
         }
+        onStop();
     }
 
-    public void init() {
+    public void onInit() {
     }
 
-    public void initLoop() {
+    public void onInitLoop() {
     }
 
-    public void once() {
+    public void onStart() {
     }
 
-    public void loop() {
+    public void onLoop() {
     }
 
-    public void sleep(long ms) {
-        opMode.sleep(ms);
+    public void onStop() {
     }
 }

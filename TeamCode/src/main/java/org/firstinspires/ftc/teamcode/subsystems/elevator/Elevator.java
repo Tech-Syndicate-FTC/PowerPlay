@@ -23,6 +23,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
+import org.firstinspires.ftc.teamcode.opmodes.BaseOpMode;
 import org.firstinspires.ftc.teamcode.subsystems.SharedStates;
 
 import java.util.Arrays;
@@ -37,7 +38,7 @@ public class Elevator {
     final double HOME_POWER = -0.5;
 
     public final static int ELEVATOR_MIN = 0;
-    public final static int ELEVATOR_HOME = inchesToTicks(2.5);
+    public final static int ELEVATOR_HOME = 0;
     public final static int ELEVATOR_STACK_TOP = inchesToTicks(6.5);
     public final static int ELEVATOR_LOW = inchesToTicks(12);
     public final static int ELEVATOR_MID = inchesToTicks(19);
@@ -75,16 +76,16 @@ public class Elevator {
     final double HAND_HOME_POSITION = 0.3;
 
     public final double HAND_OPEN = 0.3;
-    public final double HAND_READY = 0.4;
-    public final double HAND_CLOSE = 0.5;
+    public final double HAND_CLOSE = 0.52; //higher is more closed
+    public final double HAND_READY = HAND_OPEN + (HAND_CLOSE - HAND_OPEN) / 2;
 
     private DcMotorEx liftMotor;
     private List<DcMotorEx> motors;
-    private Servo hand;   //smaller values open the hand more
+    private Servo hand;
     private ElapsedTime elevatorStateTimer = new ElapsedTime();
     private ElapsedTime runTime = new ElapsedTime();
 
-    private LinearOpMode myOpMode = null;
+    private BaseOpMode myOpMode = null;
     private boolean isAutonomous = false;
 
     // elevator state variables
@@ -111,7 +112,7 @@ public class Elevator {
 
     private double handPosition = 0;
 
-    public Elevator(LinearOpMode opMode, boolean isAuto) {
+    public Elevator(BaseOpMode opMode, boolean isAuto) {
         // Attach to hardware devices
         myOpMode = opMode;
         isAutonomous = isAuto;
@@ -392,9 +393,9 @@ public class Elevator {
 
     public void showElevatorState() {
         // Display key arm data
-        myOpMode.telemetry.addData("arm state", elevatorState);
-        myOpMode.telemetry.addData("arm Set/Pos", "%d, %d", liftTargetPosition, liftPosition);
-        myOpMode.telemetry.addData("arm Err/Pwr", "%d, %4.2f", liftError, liftMotor.getPower());
+        myOpMode.t.addData("arm state", elevatorState);
+        myOpMode.t.addData("arm Set/Pos", "%d, %d", liftTargetPosition, liftPosition);
+        myOpMode.t.addData("arm Err/Pwr", "%d, %4.2f", liftError, liftMotor.getPower());
     }
 
     /***

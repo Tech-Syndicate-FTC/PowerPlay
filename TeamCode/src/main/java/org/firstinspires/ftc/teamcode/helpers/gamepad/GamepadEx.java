@@ -80,12 +80,16 @@ public class GamepadEx {
         public Button Square;
         public Button Circle;
         public Button X;
+        public Button Share;
+        public Button Options;
 
         public ButtonGroup(Gamepad gamepad) {
             Triangle = new Button(gamepad.y);
             Square = new Button(gamepad.x);
             Circle = new Button(gamepad.b);
             X = new Button(gamepad.a);
+            Share = new Button(gamepad.back);
+            Options = new Button(gamepad.start);
         }
 
         public void poll(Gamepad gamepad) {
@@ -93,16 +97,36 @@ public class GamepadEx {
             Square.poll(gamepad.x);
             Circle.poll(gamepad.b);
             X.poll(gamepad.a);
+            Share.poll(gamepad.back);
+            Options.poll(gamepad.start);
+        }
+    }
+
+    public class TriggerGroup {
+        public Button Left;
+        public Button Right;
+
+        public TriggerGroup(Gamepad gamepad) {
+            Left = new Button(gamepad.left_trigger > 0.5);
+            Right = new Button(gamepad.right_trigger > 0.5);
+        }
+
+        public void poll(Gamepad gamepad) {
+            Left.poll(gamepad.left_trigger > 0.5);
+            Right.poll(gamepad.right_trigger > 0.5);
         }
     }
 
     public ButtonGroup Buttons;
+    public TriggerGroup Triggers;
 
     public GamepadEx(Gamepad gamepad) {
         Buttons = new ButtonGroup(gamepad);
+        Triggers = new TriggerGroup(gamepad);
     }
 
     public void poll(Gamepad gamepad) {
         Buttons.poll(gamepad);
+        Triggers.poll(gamepad);
     }
 }

@@ -1,77 +1,91 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.Ground;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.High;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.Low;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.Medium;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.IDLE;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.Gamepad;
+import com.qualcomm.robotcore.hardware.DcMotor;
 
-import org.firstinspires.ftc.teamcode.subsystems.drivetrain.ArmDrive;
+import org.firstinspires.ftc.teamcode.opmodes.BaseOpMode;
+import org.firstinspires.ftc.teamcode.subsystems.SharedStates;
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
+import org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator;
+import org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState;
 
-import java.util.Locale;
-
-/**
- * This is a simple teleop routine for testing localization. Drive the robot around like a normal
- * teleop routine and make sure the robot's estimated pose matches the robot's actual pose (slight
- * errors are not out of the ordinary, especially with sudden drive motions). The goal of this
- * exercise is to ascertain whether the localizer has been configured properly (note: the pure
- * encoder localizer heading may be significantly off if the track width has not been tuned).
- */
-@TeleOp(name = "Competition TeleOp", group = "Teleop")
-public class TeleOpMode extends LinearOpMode {
-    public DriveTrain drive;
-    private Gamepad gamepad;
+@TeleOp(name = "TeleOp")
+public class TeleOpMode extends BaseOpMode {
 
     @Override
-    public void runOpMode() throws InterruptedException {
-        DriveTrain drive = new DriveTrain(hardwareMap);
-        ArmDrive arm = new ArmDrive(hardwareMap);
-
-        //drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        telemetry.clearAll();
-        telemetry.update();
-
-        waitForStart();
-
-        while (!isStopRequested()) {
-
-            drive.driveType = DriveTrain.DriveType.ROBOT_CENTRIC;
-            gamepad = gamepad1;
-            drive.gamepadInput = new Vector2d(-gamepad.left_stick_y, -gamepad.left_stick_x);
-            drive.gamepadInputTurn = -gamepad.right_stick_x;
-
-
-            if (gamepad.right_trigger > 0.25) {
-                arm.closeClawManual();
-            }
-
-            if (gamepad.left_trigger > 0.25) {
-                arm.openClawManual();
-            }
-
-            if (gamepad.y) {
-                arm.slideUp();
-                //drive.elevator.slide(Elevator.Direction.UP,1);
-            } else if (gamepad.a) {
-                arm.slideDown();
-                //drive.elevator.slide(Elevator.Direction.DOWN,1);
-            }
-
-
-            drive.driveTrainPointFieldModes();
-            drive.update();
-            arm.update();
-
-            Pose2d poseEstimate = drive.getPoseEstimate();
-            telemetry.addData("x", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getX()));
-            telemetry.addData("y", String.format(Locale.ENGLISH, "%3.2f", poseEstimate.getY()));
-            telemetry.addData("heading", String.format(Locale.ENGLISH, "%3.2f°", poseEstimate.getHeading()));
-            //telemetry.addData("claw", String.format(Locale.ENGLISH, "%3.0f", drive.arm.getClawPosition()));
-            //telemetry.addData("slide", String.format(Locale.ENGLISH, "%1.0f", drive.arm.getSlidePower()));
-            telemetry.addData("slide_pos", arm.getSlidePosition());
-            telemetry.update();
-
+    public void onInit() {
+        elevator.setState(SharedStates.elevatorState);
+        if (SharedStates.currentPose != null) {
+            drive.setExternalHeading(SharedStates.currentPose.getHeading());
+            SharedStates.currentPose = null;
+        } else {
+            drive.setExternalHeading(0);
         }
+        drive.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+    }
+
+    @Override
+    public void onInitLoop() {
+        elevator.runStateMachine();
+        elevator.update();
+    }
+
+    @Override
+    public void onStart() {
+        elevator.setLiftTargetPosition(Elevator.ELEVATOR_HOME);
+
+        copilot.Buttons.Triangle.onPress(() -> {
+            elevator.setLevel(High);
+        });
+
+        copilot.Buttons.Circle.onPress(() -> {
+            elevator.setLevel(Medium);
+        });
+
+        copilot.Buttons.Square.onPress(() -> {
+            elevator.setLevel(Low);
+        });
+
+        copilot.Buttons.X.onPress(() -> {
+            elevator.setLevel(Ground);
+        });
+
+        copilot.Triggers.Right.onPress(() -> {
+            elevator.closeClaw();
+        });
+
+        copilot.Triggers.Left.onPress(() -> {
+            elevator.openClaw();
+        });
+    }
+
+    @Override
+    public void onLoop() {
+        drive.driveType = DriveTrain.DriveType.ROBOT_CENTRIC;
+        drive.gamepadInput = new Vector2d(-gamepad1.left_stick_y, -gamepad1.left_stick_x);
+        drive.gamepadInputTurn = -gamepad1.right_stick_x;
+
+        drive.driveTrainPointFieldModes();
+
+        if (copilot.Buttons.Share.isPressed() && copilot.Buttons.Options.isPressed()) {
+            elevator.setState(IDLE);
+        }
+
+        t.addData("Elevator", elevator.getStateText());
+        elevator.showElevatorState();
+
+        Pose2d poseEstimate = drive.getPoseEstimate();
+        t.addData("x", String.format("%3.2f", poseEstimate.getX()));
+        t.addData("y", String.format("%3.2f", poseEstimate.getY()));
+        t.addData("heading", String.format("%3.2f", Math.toDegrees(drive.getExternalHeading())));
+        t.update();
     }
 }
