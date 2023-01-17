@@ -24,7 +24,6 @@ public class GamepadEx {
         private Runnable releaseFunction = () -> {
         };
         private Runnable holdFunction = () -> {
-
         };
 
         public Button(boolean button) {

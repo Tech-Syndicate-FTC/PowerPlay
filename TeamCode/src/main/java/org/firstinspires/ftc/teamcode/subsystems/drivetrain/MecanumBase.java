@@ -100,7 +100,7 @@ public class MecanumBase extends MecanumDrive {
         batteryVoltageSensor = hardwareMap.voltageSensor.iterator().next();
 
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-            module.setBulkCachingMode(LynxModule.BulkCachingMode.MANUAL);
+            module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);
         }
 
         imu = hardwareMap.get(BNO055IMU.class, "imu");

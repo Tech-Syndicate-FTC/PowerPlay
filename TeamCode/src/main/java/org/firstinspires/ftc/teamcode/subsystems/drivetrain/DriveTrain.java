@@ -70,15 +70,11 @@ public class DriveTrain extends MecanumBase {
      */
     public DriveTrain(HardwareMap hardwareMap) {
         super(hardwareMap);
-        //arm = new ArmDrive(hardwareMap);
-        //elevator = new Elevator(hardwareMap, "Slide");
     }
 
     @Override
     public void update() {
         super.update();
-        //arm.update();
-        //elevator.update();
     }
 
     public Vector2d gamepadInput = new Vector2d(0, 0);

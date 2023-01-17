@@ -15,13 +15,14 @@ import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 
-@Autonomous(name = "Auto Park")
+@Autonomous(name = "Auto Park")//, preselectTeleOp = "TeleOp")
 public class AutoPark extends LinearOpMode {
 
     private DriveTrain drive;
     private SleeveDetection sleeveDetection;
     private OpenCvCamera camera;
     private MultipleTelemetry t;
+    private SleeveDetection.ParkingPosition position;
 
     // Name of the Webcam to be set in the config
     private String webcamName = "Webcam 1";
@@ -51,28 +52,28 @@ public class AutoPark extends LinearOpMode {
             for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
                 module.clearBulkCache();
             }
-            t.addData("Position", sleeveDetection.getPosition());
+            position = sleeveDetection.getPosition();
+            t.addData("position", position);
             t.update();
         }
         waitForStart();
         if (opModeIsActive()) {
             camera.stopStreaming();
 
-            TrajectorySequenceBuilder traj = drive.trajectorySequenceBuilder(new Pose2d(0, 0, 0))
-                    .forward(50);
+            TrajectorySequenceBuilder trajectory = drive.trajectorySequenceBuilder(new Pose2d(0, 0, 0))
+                    .forward(48);
 
-            switch (sleeveDetection.getPosition()) {
+            switch (position) {
                 case LEFT:
-                    traj.strafeLeft(12);
+                    trajectory.strafeLeft(19);
+                    break;
                 case RIGHT:
-                    traj.strafeRight(12);
+                    trajectory.strafeRight(19);
+                    break;
             }
 
-            drive.followTrajectorySequenceAsync(traj.build());
+            drive.followTrajectorySequenceAsync(trajectory.build());
             while (!Thread.currentThread().isInterrupted() && drive.isBusy()) {
-                for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-                    module.clearBulkCache();
-                }
                 t.update();
                 drive.update();
             }

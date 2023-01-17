@@ -30,15 +30,11 @@ public abstract class BaseOpMode extends LinearOpMode{
         waitForStart();
         onStart();
         while (!isStopRequested() && opModeIsActive()) {
-            for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-                module.clearBulkCache();
-            }
             pilot.poll(gamepad1);
             copilot.poll(gamepad2);
             onLoop();
             drive.update();
-            elevator.update();
-            elevator.runStateMachine();
+            elevator.periodic();
         }
         onStop();
     }

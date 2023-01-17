@@ -43,9 +43,6 @@ public class VisionTest extends LinearOpMode {
         });
 
         while (!isStarted()) {
-            for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
-                module.clearBulkCache();
-            }
             t.addData("Position: ", sleeveDetection.getPosition());
             t.update();
         }
