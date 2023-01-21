@@ -128,12 +128,27 @@ public class DriveTrain extends MecanumBase {
 
         switch (driveMode) {
             case NORMAL_CONTROL:
-                driveDirection = new Pose2d(
-                        gamepadInput.getX(),
-                        gamepadInput.getY(),
-                        gamepadInputTurn
-                );
+                switch (driveType) {
+                    case ROBOT_CENTRIC:
+                        driveDirection = new Pose2d(
+                                gamepadInput.getX(),
+                                gamepadInput.getY(),
+                                gamepadInputTurn
+                        );
+                        break;
+                    case FIELD_CENTRIC:
+                        Vector2d input = new Vector2d(
+                                gamepadInput.getX(),
+                                gamepadInput.getY()
+                        ).rotated(-poseEstimate.getHeading());
+                        driveDirection = new Pose2d(
+                                input.getX(),
+                                input.getY(),
+                                gamepadInputTurn
+                        );
+                }
 
+                /*
                 switch (augmentedControl) {
                     case NONE:
                         augmentedControl = AugmentedControl.NONE;
@@ -147,8 +162,11 @@ public class DriveTrain extends MecanumBase {
                         augmentedControl = AugmentedControl.NONE;
                         break;
                 }
-                break;
 
+                break;
+                 */
+
+                /*
             case ALIGN_TO_POINT:
                 // Create a vector from the gamepad x/y inputs which is the field relative movement
                 // Then, rotate that vector by the inverse of that heading for field centric control
@@ -183,7 +201,7 @@ public class DriveTrain extends MecanumBase {
                         headingInput
                 );
 
-                /* FTCDashBoard Code */
+                // FTCDashBoard Code
                 if (FtcDashboard_FLAG) {
                     // Draw the target on the field
                     fieldOverlay.setStroke("#dd2c00");
@@ -195,9 +213,11 @@ public class DriveTrain extends MecanumBase {
                     fieldOverlay.setStroke("#ffce7a");
                     fieldOverlay.strokeLine(drivePointToAlign.getX(), drivePointToAlign.getY(), drivePointToAlign.getX(), poseEstimate.getY());
                     fieldOverlay.strokeLine(drivePointToAlign.getX(), poseEstimate.getY(), poseEstimate.getX(), poseEstimate.getY());
-                    // END FTCDashboard Code */
+                    // END FTCDashboard Code
                 }
                 break;
+        }
+        */
         }
 
         setWeightedDrivePower(driveDirection);

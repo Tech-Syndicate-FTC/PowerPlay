@@ -23,6 +23,7 @@ public class TeleOpMode extends BaseOpMode {
     double PRECISE_MULTIPLIER = 0.5;
 
     boolean preciseMovement = false;
+    boolean fieldCentric = false;
 
     @Override
     public void onInit() {
@@ -49,6 +50,10 @@ public class TeleOpMode extends BaseOpMode {
         // PILOT Controls
         pilot.Buttons.Square.onPress(() -> {
             preciseMovement = !preciseMovement;
+        });
+
+        pilot.Buttons.Triangle.onPress(() -> {
+            fieldCentric = !fieldCentric;
         });
 
         // COPILOT Controls
@@ -86,7 +91,10 @@ public class TeleOpMode extends BaseOpMode {
             moveMultiplier = PRECISE_MULTIPLIER;
             turnMultiplier = PRECISE_MULTIPLIER;
         }
-        drive.driveType = DriveTrain.DriveType.ROBOT_CENTRIC;
+        if (fieldCentric)
+            drive.driveType = DriveTrain.DriveType.FIELD_CENTRIC;
+        else
+            drive.driveType = DriveTrain.DriveType.ROBOT_CENTRIC;
         drive.gamepadInput = new Vector2d(-gamepad1.left_stick_y * moveMultiplier, -gamepad1.left_stick_x * moveMultiplier);
         drive.gamepadInputTurn = -gamepad1.right_stick_x * turnMultiplier;
 
@@ -96,14 +104,17 @@ public class TeleOpMode extends BaseOpMode {
             elevator.homeElevator();
         }
 
+        elevator.jogElevator(-gamepad2.left_stick_y);
+
         t.addData("Elevator", elevator.getStateText());
         elevator.showElevatorState();
 
         Pose2d poseEstimate = drive.getPoseEstimate();
-        t.addData("x", String.format("%3.2f", poseEstimate.getX()));
-        t.addData("y", String.format("%3.2f", poseEstimate.getY()));
-        t.addData("heading", String.format("%3.2f", Math.toDegrees(drive.getExternalHeading())));
+        t.addData("x", "%3.2f", poseEstimate.getX());
+        t.addData("y", "%3.2f", poseEstimate.getY());
+        t.addData("heading", "%3.2f", Math.toDegrees(drive.getExternalHeading()));
         t.addData("precise", preciseMovement);
+        t.addData("drive type", drive.driveType);
         t.update();
     }
 }

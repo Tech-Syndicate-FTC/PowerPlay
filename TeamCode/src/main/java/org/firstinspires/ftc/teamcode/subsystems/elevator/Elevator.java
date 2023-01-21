@@ -1,15 +1,12 @@
 package org.firstinspires.ftc.teamcode.subsystems.elevator;
 
-import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.HOME;
 import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.HOMING;
 import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.IDLE;
 import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.IN_POSITION;
-import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.MOVING;
-import static org.firstinspires.ftc.teamcode.subsystems.elevator.ElevatorState.WAITING_TO_MOVE;
 
-import com.arcrobotics.ftclib.command.SubsystemBase;
-import com.arcrobotics.ftclib.hardware.motors.Motor;
-import com.arcrobotics.ftclib.hardware.motors.MotorEx;
+import com.arcrobotics.ftclib.controller.PController;
+import com.arcrobotics.ftclib.controller.PIDController;
+import com.arcrobotics.ftclib.controller.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -21,37 +18,20 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.teamcode.opmodes.BaseOpMode;
 import org.firstinspires.ftc.teamcode.SharedStates;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class Elevator {
     // Ticks per inch calculation (537.7*8.7)/38.4=128.8
-    private static final double TICKS_PER_IN = 128.8;
-    private static final double HEIGHT_OFF_GROUND = 2.5;
+    private static final double TICKS_PER_IN = 86.1979166;//87.11328125;
 
-    final boolean DROP_ON_HOME = true;
     final double HOME_POWER = -0.5;
 
     public final static int ELEVATOR_MIN = 0;
     public final static int ELEVATOR_HOME = 0;
-    public final static int ELEVATOR_STACK_TOP = inchesToTicks(6.5);
-    public final static int ELEVATOR_LOW = inchesToTicks(12);
-    public final static int ELEVATOR_MID = inchesToTicks(19);
-    public final static int ELEVATOR_HIGH = inchesToTicks(28);
-    public final static int ELEVATOR_MAX = inchesToTicks(37);
+    public final static int ELEVATOR_STACK_TOP = $(5);
+    public final static int ELEVATOR_LOW = $(12);
+    public final static int ELEVATOR_MID = $(21);
+    public final static int ELEVATOR_HIGH = $(35);
+    public final static int ELEVATOR_MAX = $(38.4);
 
-    final static int ELEVATOR_COUNTS_PER_CONE = inchesToTicks(1);
-    final static int ELEVATOR_RELEASE_DROP = inchesToTicks(7);
-
-    final static int ELEVATOR_TOP_LEVEL = 5;
-    final static int elevatorLevel[] = {
-            Elevator.ELEVATOR_MIN,
-            Elevator.ELEVATOR_HOME,
-            Elevator.ELEVATOR_STACK_TOP,
-            Elevator.ELEVATOR_LOW,
-            Elevator.ELEVATOR_MID,
-            Elevator.ELEVATOR_HIGH
-    };
 
     public enum Junctions {
         Ground,
@@ -60,13 +40,7 @@ public class Elevator {
         High
     }
 
-    final int DEAD_BAND = 20;
-    final double FAST_LIFT = 1;
-    final double SLOW_LIFT = 0.2;
-    final double SLOW_LOWER = -0.2;
-    final double FAST_LOWER = -0.7;
-    final double HOLD_POWER = 0.05;
-    final double IN_POSITION_LIMIT = 10;
+    final double POSITION_TOLERANCE = 15;
 
     final double HAND_HOME_POSITION = 0.3;
 
@@ -75,7 +49,7 @@ public class Elevator {
     public final double HAND_CLOSE = 0.55; //higher is more closed
     public final double HAND_READY = HAND_OPEN + (HAND_CLOSE - HAND_OPEN) / 2;
 
-    private MotorEx liftMotor;
+    private DcMotorEx liftMotor;
     private Servo hand;
     private ElapsedTime elevatorStateTimer = new ElapsedTime();
     private ElapsedTime runTime = new ElapsedTime();
@@ -86,47 +60,43 @@ public class Elevator {
     // elevator state variables
     private int currentElevatorLevel = 0;
     private ElevatorState elevatorState = IDLE;
-    private boolean liftActive = false;
+    private boolean liftActive = SharedStates.elevatorHomed;
     public boolean liftInPosition = false;
     private int liftPosition = 0;
     private int liftError = 0;
     private int liftTargetPosition = 0;
     private int liftLastPosition = 0;
-    private boolean wristIsSafe = false;
 
     public boolean newLevelRequested = false;
     private int requestedPosition;
-    private double pendingDelay;
-    private int pendingLiftPosition;
-    private ElevatorState pendingState;
 
-    public boolean driverAutoGrabRequest = false;
-    public boolean driverManualGrabRequest = false;
-    public boolean terminateSequence = false;
     public boolean handIsOpen = true;
 
     private double handPosition = 0;
+
+    private PIDFController controller = new PIDFController(5, 0, 0, 0.8);
 
     public Elevator(LinearOpMode opMode, boolean isAuto) {
         // Attach to hardware devices
         myOpMode = opMode;
         isAutonomous = isAuto;
-        liftMotor = new MotorEx(myOpMode.hardwareMap, "Slide", Motor.GoBILDA.RPM_435);//myOpMode.hardwareMap.get(DcMotorEx.class, "Slide");
+        liftMotor = myOpMode.hardwareMap.get(DcMotorEx.class, "Slide");
         hand = myOpMode.hardwareMap.get(Servo.class, "claw");
 
-        liftMotor.setRunMode(Motor.RunMode.PositionControl);
-        liftMotor.setTargetPosition(liftTargetPosition);
-        liftMotor.set(0);
-        liftMotor.setPositionTolerance(IN_POSITION_LIMIT);
+        liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        //liftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+        liftMotor.setDirection(DcMotorSimple.Direction.FORWARD);
+
+        controller.setTolerance(POSITION_TOLERANCE);
+
+
         if (isAuto) {
             setHandPosition(HAND_CLOSE);
         } else {
             setHandPosition(HAND_HOME_POSITION);
         }
 
-        currentElevatorLevel = 0;
         newLevelRequested = false;
         elevatorState = SharedStates.elevatorState;
     }
@@ -140,7 +110,6 @@ public class Elevator {
         setState(newState);
         switch (elevatorState) {
             case IDLE: {
-                resetStackHeight();
                 setState(HOMING);
                 break;
             }
@@ -168,7 +137,6 @@ public class Elevator {
                 if (newLiftPosition()) {
                     setLiftTargetPosition(requestedPosition);
                 }
-
                 break;
             }
         }
@@ -218,55 +186,31 @@ public class Elevator {
     public boolean update() {
         liftPosition = liftMotor.getCurrentPosition();
 
-        // Run the elevator motor with 4 different speed zones.  Two up and two down.
-        if (liftActive) {
-            /*
-            liftError = liftTargetPosition - getLiftPosition();
-            if (liftError > DEAD_BAND * 10) {
-                // elevator is way too low
-                setPower(FAST_LIFT);
-            } else if (liftError > DEAD_BAND) {
-                // elevator is little too low
-                setPower(SLOW_LIFT);
-            } else if (liftError < -DEAD_BAND * 10) {
-                // elevator is way too High
-                setPower(FAST_LOWER);
-            } else if (liftError < -DEAD_BAND) {
-                // elevator is little too High
-                setPower(SLOW_LOWER);
-            } else {
-                // We are in position, so apply a little hold power unless we are at rest on support
-                if (liftTargetPosition <= ELEVATOR_HOME)
-                    setPower(0);
-                else
-                    setPower(HOLD_POWER);
-            }
+        liftError = liftTargetPosition - getLiftPosition();
 
-            liftInPosition = (Math.abs(liftError) <= IN_POSITION_LIMIT);
-            */
-            if (!liftMotor.atTargetPosition()) {
-                liftMotor.set(1);
-                liftInPosition = false;
-            } else {
-                liftMotor.stopMotor();
-                liftInPosition = true;
-            }
+        liftInPosition = Math.abs(liftError) <= POSITION_TOLERANCE;
 
-            hand.setPosition(handPosition);
+        if (!liftInPosition) {
+            double error = controller.calculate(liftPosition, liftTargetPosition);
+            liftMotor.setVelocity(error);
         }
         return liftInPosition;
+    }
+
+    public void setPower(double power) {
+        liftMotor.setPower(power);
     }
 
     public void showElevatorState() {
         // Display key arm data
         myOpMode.telemetry.addData("lift state", elevatorState);
         myOpMode.telemetry.addData("lift target/reality", "%d, %d", liftTargetPosition, liftPosition);
-        myOpMode.telemetry.addData("lift error/power", "%d", liftError);
+        myOpMode.telemetry.addData("lift error/power", "%d, %4.2f", liftError, liftMotor.getPower());
         myOpMode.telemetry.addData("lift in position", liftInPosition);
     }
 
     public void homeElevator() {
-        setState(IDLE);
+        setState(HOMING);
     }
 
     /***
@@ -275,9 +219,8 @@ public class Elevator {
      */
     public void recalibrateHomePosition() {
         disableLift();  // Stop any closed loop control
-        liftMotor.setRunMode(Motor.RunMode.RawPower);
         liftLastPosition = liftMotor.getCurrentPosition();
-        liftMotor.set(HOME_POWER);
+        setPower(HOME_POWER);
         myOpMode.sleep(250);
 
         while (!myOpMode.isStopRequested() && (liftMotor.getCurrentPosition() != liftLastPosition)) {
@@ -285,14 +228,12 @@ public class Elevator {
             myOpMode.sleep(50);
         }
 
+        setPower(0);
+        myOpMode.sleep(150);
+        liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         myOpMode.sleep(50);
-        liftMotor.set(0);
-        myOpMode.sleep(250);
-
-        liftMotor.resetEncoder();
-        liftMotor.setRunMode(Motor.RunMode.PositionControl);
-        setLiftTargetPosition(0);
-        currentElevatorLevel = 0;
+        liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        setLiftTargetPosition(ELEVATOR_HOME);
         newLevelRequested = false;
         enableLift();  // Start closed loop control
     }
@@ -343,36 +284,17 @@ public class Elevator {
     // ===== Autonomous Features   ================================
     // called from AUTO to release cone and make hand safe.
 
-    public boolean sequenceComplete() {
-        if (terminateSequence) {
-            terminateSequence = false;
-            return true;
-        } else {
-            return false;
-        }
-    }
-
 
     // ===== Autonomous Features   ================================
 
-    public void dropStackHeight() {
-        elevatorLevel[1] -= ELEVATOR_COUNTS_PER_CONE;
-    }
-
-    public int getStackHeight() {
-        return elevatorLevel[1];
-    }
-
-    public void resetStackHeight() {
-        elevatorLevel[1] = ELEVATOR_STACK_TOP;
-    }
-
     public void enableLift() {
         liftActive = true;
+        SharedStates.elevatorHomed = true;
     }
 
     public void disableLift() {
         liftActive = false;
+        SharedStates.elevatorHomed = false;
     }
 
     public void setLiftTargetPosition(int Position) {
@@ -389,12 +311,21 @@ public class Elevator {
         return liftPosition;
     }
 
+    public int getLiftError() {
+        return liftError;
+    }
+
+    public int getAbsLiftError() {
+        return Math.abs(liftError);
+    }
+
     public int getLiftRawPosition() {
         return liftMotor.getCurrentPosition();
     }
 
     public void jogElevator(double speed) {
-        setLiftTargetPosition(liftTargetPosition + (int) (speed * 20));
+        //setLiftTargetPosition(liftTargetPosition + (int) (speed * 20));
+        setLiftTargetPosition(liftTargetPosition + $(speed));
     }
 
     public void setHandPosition(double position) {
@@ -404,11 +335,7 @@ public class Elevator {
     }
 
     // Inches to ticks
-    public static int inchesToTicks(double inches) {
-        return (int) ((inches - HEIGHT_OFF_GROUND) * TICKS_PER_IN);
-    }
-
-    public static double ticksToInches(int ticks) {
-        return (double) ((ticks * TICKS_PER_IN) + HEIGHT_OFF_GROUND);
+    public static int $(double inches) {
+        return (int) (inches * TICKS_PER_IN);
     }
 }

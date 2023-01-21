@@ -13,9 +13,11 @@ import android.annotation.SuppressLint;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.MultipleTelemetry;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.arcrobotics.ftclib.command.Command;
 import com.arcrobotics.ftclib.command.CommandScheduler;
 import com.arcrobotics.ftclib.command.InstantCommand;
 import com.arcrobotics.ftclib.command.ParallelCommandGroup;
+import com.arcrobotics.ftclib.command.SelectCommand;
 import com.arcrobotics.ftclib.command.SequentialCommandGroup;
 import com.arcrobotics.ftclib.command.WaitCommand;
 import com.qualcomm.hardware.lynx.LynxModule;
@@ -34,6 +36,8 @@ import org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
+
+import java.util.HashMap;
 
 @Autonomous(name = "Right Preloaded Cone Only")//, preselectTeleOp = "TeleOp")
 public class OnlyPreloaded extends LinearOpMode {
@@ -83,27 +87,35 @@ public class OnlyPreloaded extends LinearOpMode {
 
         waitForStart();
         camera.stopStreaming();
-        CommandScheduler.getInstance().schedule(
+        schedule(
                 new SequentialCommandGroup(
                         new ElevatorHomeCommand(elevator),
                         new ElevatorClawCommand(elevator, CLOSED),
-                        new ForwardCommand(drive, 60),
+                        new ForwardCommand(drive, 56),
                         new ParallelCommandGroup(
                                 new ElevatorLevelCommand(elevator, High, 2),
-                                new StrafeCommand(drive, 13.5, LEFT)
+                                new StrafeCommand(drive, 13.53, LEFT)
                         ),
-                        new WaitCommand(700),
-                        new ForwardCommand(drive, 2),
+                        new WaitCommand(800),
+                        new ForwardCommand(drive, 2.1),
                         new WaitCommand(200),
                         new ElevatorLevelCommand(elevator, Medium, 5),
-                        new WaitCommand(200),
+                        new WaitCommand(300),
                         new ElevatorClawCommand(elevator, OPEN),
                         new WaitCommand(200),
                         new ParallelCommandGroup(
-                                new ForwardCommand(drive, -2),
+                                new ForwardCommand(drive, -2.5),
                                 new ElevatorLevelCommand(elevator, Ground)
                         ),
                         new ElevatorHomeCommand(elevator),
+                        new SelectCommand(
+                                new HashMap<Object, Command>() {{
+                                    put(SleeveDetection.ParkingPosition.LEFT, new WaitCommand(10));
+                                    put(SleeveDetection.ParkingPosition.CENTER, new StrafeCommand(drive, 13.53, RIGHT));
+                                    put(SleeveDetection.ParkingPosition.RIGHT, new StrafeCommand(drive, 30, RIGHT));
+                                }},
+                                sleeveDetection::getPosition
+                        ),
                         new InstantCommand(() -> {
                             finished = true;
                         })
@@ -111,7 +123,7 @@ public class OnlyPreloaded extends LinearOpMode {
         );
 
         while (opModeIsActive() && !finished && !isStopRequested()) {
-            CommandScheduler.getInstance().run();
+            run();
             drive.update();
             elevator.periodic();
 
@@ -126,5 +138,13 @@ public class OnlyPreloaded extends LinearOpMode {
         }
         t.addLine("Finished");
         t.update();
+    }
+
+    public void schedule(Command... commands) {
+        CommandScheduler.getInstance().schedule(commands);
+    }
+
+    public void run() {
+        CommandScheduler.getInstance().run();
     }
 }

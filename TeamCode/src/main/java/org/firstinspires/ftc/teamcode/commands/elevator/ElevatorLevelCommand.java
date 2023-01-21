@@ -30,6 +30,6 @@ public class ElevatorLevelCommand extends CommandBase {
 
     @Override
     public boolean isFinished() {
-        return Math.abs(elevator.getLiftRawPosition() - elevator.getLiftTargetPosition()) > allowedError;
+        return Math.abs(elevator.getAbsLiftError()) > allowedError;
     }
 }
