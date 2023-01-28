@@ -4,6 +4,7 @@ import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Juncti
 import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.High;
 import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.Low;
 import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.Medium;
+import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.Stack;
 
 import android.annotation.SuppressLint;
 
@@ -72,6 +73,27 @@ public class TeleOpMode extends BaseOpMode {
         copilot.Buttons.X.onPress(() -> {
             elevator.setLevel(Ground);
         });
+
+        /*
+
+        copilot.DPad.Up.onPress(() -> {
+            elevator.setLevel(Stack);
+        });
+
+        copilot.DPad.Right.onPress(() -> {
+            elevator.setLevel(elevator.getJunction(Stack)-Elevator.$());
+        });
+
+        copilot.DPad.Left.onPress(() -> {
+
+        });
+
+        copilot.DPad.Down.onPress(() -> {
+
+        });
+        */
+
+        // Claw Controls
 
         copilot.Triggers.Right.onPress(() -> {
             elevator.closeClaw();

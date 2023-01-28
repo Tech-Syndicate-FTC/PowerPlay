@@ -116,16 +116,40 @@ public class GamepadEx {
         }
     }
 
+    public class DPadGroup {
+        public Button Up;
+        public Button Down;
+        public Button Left;
+        public Button Right;
+
+        public DPadGroup(Gamepad gamepad) {
+            Up = new Button(gamepad.dpad_up);
+            Down = new Button(gamepad.dpad_down);
+            Left = new Button(gamepad.dpad_left);
+            Right = new Button(gamepad.dpad_right);
+        }
+
+        public void poll(Gamepad gamepad) {
+            Up.poll(gamepad.dpad_up);
+            Down.poll(gamepad.dpad_down);
+            Left.poll(gamepad.dpad_left);
+            Right.poll(gamepad.dpad_right);
+        }
+    }
+
     public ButtonGroup Buttons;
     public TriggerGroup Triggers;
+    public DPadGroup DPad;
 
     public GamepadEx(Gamepad gamepad) {
         Buttons = new ButtonGroup(gamepad);
         Triggers = new TriggerGroup(gamepad);
+        DPad = new DPadGroup(gamepad);
     }
 
     public void poll(Gamepad gamepad) {
         Buttons.poll(gamepad);
         Triggers.poll(gamepad);
+        DPad.poll(gamepad);
     }
 }

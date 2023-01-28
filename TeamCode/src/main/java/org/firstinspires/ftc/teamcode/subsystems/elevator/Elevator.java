@@ -29,7 +29,7 @@ public class Elevator {
     public final static int ELEVATOR_STACK_TOP = $(5);
     public final static int ELEVATOR_LOW = $(12);
     public final static int ELEVATOR_MID = $(21);
-    public final static int ELEVATOR_HIGH = $(35);
+    public final static int ELEVATOR_HIGH = $(30);
     public final static int ELEVATOR_MAX = $(38.4);
 
 
@@ -37,7 +37,8 @@ public class Elevator {
         Ground,
         Low,
         Medium,
-        High
+        High,
+        Stack,
     }
 
     final double POSITION_TOLERANCE = 15;
@@ -83,6 +84,7 @@ public class Elevator {
         liftMotor = myOpMode.hardwareMap.get(DcMotorEx.class, "Slide");
         hand = myOpMode.hardwareMap.get(Servo.class, "claw");
 
+        liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         liftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -110,7 +112,7 @@ public class Elevator {
         setState(newState);
         switch (elevatorState) {
             case IDLE: {
-                setState(HOMING);
+                setState(IN_POSITION);
                 break;
             }
 
@@ -186,12 +188,13 @@ public class Elevator {
     public boolean update() {
         liftPosition = liftMotor.getCurrentPosition();
 
-        liftError = liftTargetPosition - getLiftPosition();
+        liftError = liftTargetPosition - liftPosition;
 
         liftInPosition = Math.abs(liftError) <= POSITION_TOLERANCE;
 
+        double error = controller.calculate(liftPosition, liftTargetPosition);
         if (!liftInPosition) {
-            double error = controller.calculate(liftPosition, liftTargetPosition);
+
             liftMotor.setVelocity(error);
         }
         return liftInPosition;
@@ -221,17 +224,17 @@ public class Elevator {
         disableLift();  // Stop any closed loop control
         liftLastPosition = liftMotor.getCurrentPosition();
         setPower(HOME_POWER);
-        myOpMode.sleep(250);
+        myOpMode.sleep(25);
 
         while (!myOpMode.isStopRequested() && (liftMotor.getCurrentPosition() != liftLastPosition)) {
             liftLastPosition = liftMotor.getCurrentPosition();
-            myOpMode.sleep(50);
+            myOpMode.sleep(25);
         }
 
         setPower(0);
         myOpMode.sleep(150);
         liftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        myOpMode.sleep(50);
+        myOpMode.sleep(25);
         liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         setLiftTargetPosition(ELEVATOR_HOME);
         newLevelRequested = false;
@@ -249,23 +252,24 @@ public class Elevator {
 
     // ----- Elevator controls  --- REQUESTS FROM External sources
 
-    public void setLevel(Junctions junction) {
-        int newLevel = 0;
+    public int getJunction(Junctions junction) {
         switch (junction) {
             case Ground:
-                newLevel = ELEVATOR_MIN;
-                break;
+                return ELEVATOR_MIN;
             case Low:
-                newLevel = ELEVATOR_LOW;
-                break;
+                return ELEVATOR_LOW;
             case Medium:
-                newLevel = ELEVATOR_MID;
-                break;
+                return ELEVATOR_MID;
             case High:
-                newLevel = ELEVATOR_HIGH;
-                break;
+                return ELEVATOR_HIGH;
+            case Stack:
+                return ELEVATOR_STACK_TOP;
         }
-        setLiftTargetPosition(newLevel);
+        return 0;
+    }
+
+    public void setLevel(Junctions junction) {
+        setLiftTargetPosition(getJunction(junction));
     }
 
     public void setLevel(int target) {
@@ -324,8 +328,7 @@ public class Elevator {
     }
 
     public void jogElevator(double speed) {
-        //setLiftTargetPosition(liftTargetPosition + (int) (speed * 20));
-        setLiftTargetPosition(liftTargetPosition + $(speed));
+        setLiftTargetPosition(liftTargetPosition + $(speed * 2));
     }
 
     public void setHandPosition(double position) {
