@@ -63,7 +63,7 @@ public class MecanumBase extends MecanumDrive {
             "back_right"
     };
 
-    private static enum Side {
+    private enum Side {
         RIGHT,
         LEFT
     }
