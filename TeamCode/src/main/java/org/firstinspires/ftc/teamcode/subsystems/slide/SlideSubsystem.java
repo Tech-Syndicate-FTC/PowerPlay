@@ -16,7 +16,7 @@ public class SlideSubsystem {
     public STATE state = STATE.GOOD;
 
     public static final double MAX_EXTENSION = 37.75;
-    public final double TICKS_PER_IN = 1;
+    public final double TICKS_PER_IN = 81.8;
 
     public final MotorEx slideLeft;
     public final MotorEx slideRight;
@@ -87,10 +87,10 @@ public class SlideSubsystem {
     public void update(ClawState state) {
         switch (state) {
             case OPEN:
-                claw.setPosition(claw_pos_open);
+                claw.turnToAngle(claw_pos_open);
                 break;
             case CLOSED:
-                claw.setPosition(claw_pos_closed);
+                claw.turnToAngle(claw_pos_closed);
                 break;
         }
     }

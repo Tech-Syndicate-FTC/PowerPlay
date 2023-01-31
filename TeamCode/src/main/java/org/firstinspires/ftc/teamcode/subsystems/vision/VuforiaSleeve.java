@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.subsystems.vision;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.ZYX;
@@ -22,7 +22,7 @@ import org.firstinspires.ftc.teamcode.SharedStates;
 
 import java.util.concurrent.TimeUnit;
 
-public class Vision {
+public class VuforiaSleeve {
     private static final String VUFORIA_KEY =
             "AbNsEgn/////AAABmR5O8hcMQEQPssvwjLBLr5aO0xPBvNfIPkauJEUOdU1NPhwkxRoTmt3jtFWRyZkE1HXTtKDMwzQIDicffaarkkFse+RyfoFRaLz0iT1Ef79arJHWA9DXXNPv+3FKTol0rkrKFpgKDh93gaCOgPOl3HKM3knD9XMhpaBSoyZrFAhDvgMsAuHQOCz5KWrPQ6NXeMhIcMH0QjPJi4bBSmJZ8NrnXkcC3CGuNiKMIohNMTMLmF1N6+ubmo2HTDjYHo4d+EwVRTouIARJEfRmadsB8zJuV98edzTRJiAeuL561B6cfVBV9dTKh0Rk+yu+ED9IQ8BTeCsKgLNgemTqfeu1bKaSypvG9x/eKWuR0sQKCN3s";
 
@@ -31,7 +31,7 @@ public class Vision {
     LinearOpMode myOpMode = null;
     VuforiaTrackables targetsPowerPlay = null;
 
-    public Vision(LinearOpMode opMode) {
+    public VuforiaSleeve(LinearOpMode opMode) {
         myOpMode = opMode;
     }
 

@@ -6,21 +6,20 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.subsystems.slide.SlideSubsystem;
 
-@Autonomous(name = "Calibrate Slide")
+@Autonomous(name = "Calibrate Slide", group = "calibration")
 public class CalibrateSlide extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        double MAX_EXTENSION = SlideSubsystem.MAX_EXTENSION;
-
         MotorEx slide = new MotorEx(hardwareMap, "slide_left");
+
+        slide.resetEncoder();
 
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
             int position = slide.getCurrentPosition();
             telemetry.addData("position", position);
-            telemetry.addData("TICKS_PER_IN", position / MAX_EXTENSION);
             telemetry.update();
         }
     }

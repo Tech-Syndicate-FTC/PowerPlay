@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.subsystems;
+package org.firstinspires.ftc.teamcode.subsystems.vision;
 
 import com.acmerobotics.dashboard.config.Config;
 
@@ -26,7 +26,7 @@ public class SleeveDetection extends OpenCvPipeline {
     }
 
     // TOPLEFT anchor point for the bounding box
-    public static Point SLEEVE_TOPLEFT_ANCHOR_POINT = new Point(20, 70);
+    public static Point SLEEVE_TOPLEFT_ANCHOR_POINT = new Point(120, 100);
 
     // Width and height for the bounding box
     public static int REGION_WIDTH = 60;

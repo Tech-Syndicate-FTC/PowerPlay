@@ -10,7 +10,6 @@ import static org.firstinspires.ftc.teamcode.opmodes.auto.AutoConstants.FORWARD_
 import static org.firstinspires.ftc.teamcode.opmodes.auto.AutoConstants.STRAFE_DISTANCE;
 import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.Ground;
 import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.High;
-import static org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator.Junctions.Medium;
 
 import android.annotation.SuppressLint;
 
@@ -35,7 +34,7 @@ import org.firstinspires.ftc.teamcode.commands.elevator.ElevatorClawCommand;
 import org.firstinspires.ftc.teamcode.commands.elevator.ElevatorHomeCommand;
 import org.firstinspires.ftc.teamcode.commands.elevator.ElevatorLevelCommand;
 import org.firstinspires.ftc.teamcode.commands.elevator.ElevatorManualCommand;
-import org.firstinspires.ftc.teamcode.subsystems.SleeveDetection;
+import org.firstinspires.ftc.teamcode.subsystems.vision.SleeveDetection;
 import org.firstinspires.ftc.teamcode.subsystems.drivetrain.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.elevator.Elevator;
 import org.openftc.easyopencv.OpenCvCamera;
@@ -111,9 +110,7 @@ public class RightOnlyPreloaded extends LinearOpMode {
             elevator.showElevatorState();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
-            t.addData("x", String.format("%3.2f", poseEstimate.getX()));
-            t.addData("y", String.format("%3.2f", poseEstimate.getY()));
-            t.addData("heading", String.format("%3.2f", Math.toDegrees(drive.getExternalHeading())));
+            t.addData("pose", "(%3.2f, %3.2f, %3.2f°)", poseEstimate.getX(), poseEstimate.getY(), Math.toDegrees(drive.getExternalHeading()));
             t.update();
         }
         t.addLine("Finished");
