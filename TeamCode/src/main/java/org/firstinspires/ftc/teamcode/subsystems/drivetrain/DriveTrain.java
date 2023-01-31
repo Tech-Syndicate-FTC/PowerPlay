@@ -35,72 +35,43 @@ public class DriveTrain extends MecanumBase {
      */
     public void gamepadDrive() {
         poseEstimate = getPoseEstimate();
-        // Declare a drive direction
-        // Pose representing desired x, y, and angular velocity
-        Pose2d driveDirection = new Pose2d();
-
-        double positionMultiplier;
-        double turnMultiplier;
 
         switch (driveMode) {
             case NORMAL:
             default:
-                positionMultiplier = 0.85;
+                gamepadInput = new Vector2d(gamepadInput.getX() * 0.85, gamepadInput.getY() * 0.85);
             case PRECISION:
-                positionMultiplier = 0.5;
-                turnMultiplier = 0.5;
+                gamepadInput = new Vector2d(gamepadInput.getX() * 0.5, gamepadInput.getY() * 0.5);
+                gamepadInputTurn = gamepadInputTurn * 0.5;
         }
-
-        gamepadInput = new Vector2d(gamepadInput.getX() * positionMultiplier, gamepadInput.getY() * positionMultiplier);
-        gamepadInputTurn = gamepadInputTurn * turnMultiplier;
 
         switch (driveType) {
             case ROBOT_CENTRIC:
-                driveDirection = new Pose2d(
-                        gamepadInput.getX(),
-                        gamepadInput.getY(),
-                        gamepadInputTurn
-                );
+                setWeightedDrivePower(new Pose2d(gamepadInput.getX(), gamepadInput.getY(), gamepadInputTurn));
                 break;
             case FIELD_CENTRIC:
-                Vector2d input = new Vector2d(
-                        gamepadInput.getX(),
-                        gamepadInput.getY()
-                ).rotated(-getExternalHeading());
-                driveDirection = new Pose2d(
-                        input.getX(),
-                        input.getY(),
-                        gamepadInputTurn
-                );
+                Vector2d input = new Vector2d(gamepadInput.getX(), gamepadInput.getY()).rotated(-getExternalHeading());
+                setWeightedDrivePower(new Pose2d(input.getX(), input.getY(), gamepadInputTurn));
         }
-
-
-        setWeightedDrivePower(driveDirection);
 
         getLocalizer().update();
     }
 
     public enum DriveMode {
-        NORMAL,
-        PRECISION;
+        NORMAL, PRECISION;
 
         public DriveMode toggle() {
-            if (this == NORMAL)
-                return PRECISION;
-            else
-                return NORMAL;
+            if (this == NORMAL) return PRECISION;
+            else return NORMAL;
         }
     }
 
     public enum DriveType {
-        ROBOT_CENTRIC,
-        FIELD_CENTRIC;
+        ROBOT_CENTRIC, FIELD_CENTRIC;
 
         public DriveType toggle() {
-            if (this == ROBOT_CENTRIC)
-                return FIELD_CENTRIC;
-            else
-                return ROBOT_CENTRIC;
+            if (this == ROBOT_CENTRIC) return FIELD_CENTRIC;
+            else return ROBOT_CENTRIC;
         }
     }
 }
