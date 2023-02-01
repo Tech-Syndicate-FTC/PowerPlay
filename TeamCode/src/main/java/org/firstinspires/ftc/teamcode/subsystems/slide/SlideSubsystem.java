@@ -8,7 +8,6 @@ import com.arcrobotics.ftclib.hardware.SimpleServo;
 import com.arcrobotics.ftclib.hardware.motors.Motor;
 import com.arcrobotics.ftclib.hardware.motors.MotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 public class SlideSubsystem {
@@ -22,9 +21,9 @@ public class SlideSubsystem {
     public final MotorEx slideRight;
     public final Motor.Encoder slideEncoder;
     public final SimpleServo claw;
-
-    public double claw_pos_open = 81;
-    public double claw_pos_closed = 148.5;
+    public final SimpleServo armLeft;
+    public final SimpleServo armRight;
+    public final SimpleServo clawPivot;
 
     public MotionProfile profile;
     public MotionState curState;
@@ -43,7 +42,7 @@ public class SlideSubsystem {
     public double power = 0.0;
     public double targetPosition = 0.0;
 
-    public double pivotOffset = 0.0;
+    public double armAngle = 0.0;
 
     public enum STATE {
         GOOD,
@@ -52,15 +51,28 @@ public class SlideSubsystem {
     }
 
     public enum ClawState {
-        OPEN,
-        CLOSED,
+        OPEN(90),
+        CLOSED(150);
+        double targetAngle = 0;
+
+        ClawState(double angle) {
+            this.targetAngle = angle;
+        }
     }
 
     public enum ArmState {
-        INTAKE,
-        TRANSITION,
-        DEPOSIT,
-        SCORE
+        INTAKE(0),
+        TRANSITION(120),
+        SCORE_LOW(115),
+        UPRIGHT(140),
+        HOME(180),
+        SCORE(180);
+
+        double targetAngle = 0;
+
+        ArmState(double angle) {
+            this.targetAngle = angle;
+        }
     }
 
     public enum PivotState {
@@ -71,6 +83,10 @@ public class SlideSubsystem {
         this.slideLeft = new MotorEx(hardwareMap, "slide_left");
         this.slideRight = new MotorEx(hardwareMap, "slide_right");
         this.claw = new SimpleServo(hardwareMap, "claw_servo", 0, 270);
+        armLeft = new SimpleServo(hardwareMap, "arm_pivot_left", 0, 300);
+        armLeft.setInverted(true);
+        armRight = new SimpleServo(hardwareMap, "arm_pivot_right", 0, 300);
+        clawPivot = new SimpleServo(hardwareMap, "claw_pivot", 0, 270);
         slideRight.setInverted(true);
         this.slideEncoder = slideLeft.encoder;
         if (isAuto) {
@@ -85,17 +101,15 @@ public class SlideSubsystem {
     }
 
     public void update(ClawState state) {
-        switch (state) {
-            case OPEN:
-                claw.turnToAngle(claw_pos_open);
-                break;
-            case CLOSED:
-                claw.turnToAngle(claw_pos_closed);
-                break;
-        }
+        claw.turnToAngle(state.targetAngle);
+    }
+
+    public void update(ArmState state) {
+        armAngle = state.targetAngle;
     }
 
     public void loop() {
+        /*
         controller = new PIDFController(P, I, D, F);
 
         curState = profile.get(timer.time());
@@ -106,6 +120,7 @@ public class SlideSubsystem {
         isExtended = (getPos() > TICKS_PER_IN * 2.5);
 
         power = controller.calculate(position, targetPosition);
+        */
     }
 
     public void read() {
@@ -113,10 +128,24 @@ public class SlideSubsystem {
     }
 
     public void write() {
+        /*
         slideRight.set(power);
         slideLeft.set(power);
+        */
+        positionArm(armAngle);
     }
 
+    public void periodic() {
+        read();
+        loop();
+        write();
+    }
+
+    public void positionArm(double angle) {
+        clawPivot.turnToAngle(angle);
+        armLeft.turnToAngle(angle + 1);
+        armRight.turnToAngle(angle);
+    }
 
     public void setSlideFactor(double factor) {
         double slideAddition = TICKS_PER_IN * factor;

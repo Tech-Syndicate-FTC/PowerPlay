@@ -4,14 +4,17 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+
 public class DriveTrain extends MecanumBase {
 
-    public DriveMode driveMode = DriveMode.NORMAL;
+    public DrivePrecision drivePrecision = DrivePrecision.NORMAL;
     public DriveType driveType = DriveType.FIELD_CENTRIC;
     // For Position
     public Pose2d poseEstimate = new Pose2d(0, 0, 0);
     public Vector2d gamepadInput = new Vector2d(0, 0);
     public double gamepadInputTurn = 0;
+    public double manualPrecision = 0;
 
     /**
      * A parameter to register all the hardware devices for DriveTrain
@@ -36,13 +39,19 @@ public class DriveTrain extends MecanumBase {
     public void gamepadDrive() {
         poseEstimate = getPoseEstimate();
 
-        switch (driveMode) {
+        switch (drivePrecision) {
             case NORMAL:
             default:
-                gamepadInput = new Vector2d(gamepadInput.getX() * 0.85, gamepadInput.getY() * 0.85);
+                gamepadInput = new Vector2d(gamepadInput.getX() * 0.9, gamepadInput.getY() * 0.9);
+                break;
             case PRECISION:
                 gamepadInput = new Vector2d(gamepadInput.getX() * 0.5, gamepadInput.getY() * 0.5);
                 gamepadInputTurn = gamepadInputTurn * 0.5;
+                break;
+            case MANUAL:
+                double speedMultiplier = 1 - 0.75 * manualPrecision;
+                gamepadInput = new Vector2d(gamepadInput.getX() * speedMultiplier, gamepadInput.getY() * speedMultiplier);
+                gamepadInputTurn = gamepadInputTurn * speedMultiplier;
         }
 
         switch (driveType) {
@@ -57,10 +66,28 @@ public class DriveTrain extends MecanumBase {
         getLocalizer().update();
     }
 
-    public enum DriveMode {
-        NORMAL, PRECISION;
+    public double getPoseX() {
+        return getPoseEstimate().getX();
+    }
 
-        public DriveMode toggle() {
+    public double getPoseY() {
+        return getPoseEstimate().getY();
+    }
+
+    public double getPoseHeading() {
+        return getPoseHeading(AngleUnit.DEGREES);
+    }
+
+    public double getPoseHeading(AngleUnit unit) {
+        if (unit == AngleUnit.RADIANS) return getExternalHeading();
+        else if (unit == AngleUnit.DEGREES) return Math.toDegrees(getExternalHeading());
+        return getExternalHeading();
+    }
+
+    public enum DrivePrecision {
+        NORMAL, PRECISION, MANUAL;
+
+        public DrivePrecision toggle() {
             if (this == NORMAL) return PRECISION;
             else return NORMAL;
         }

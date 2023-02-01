@@ -110,7 +110,7 @@ public class RightOnlyPreloaded extends LinearOpMode {
             elevator.showElevatorState();
 
             Pose2d poseEstimate = drive.getPoseEstimate();
-            t.addData("pose", "(%3.2f, %3.2f, %3.2f°)", poseEstimate.getX(), poseEstimate.getY(), Math.toDegrees(drive.getExternalHeading()));
+            t.addData("pose", "(%3.2f, %3.2f, %3.2f°)", drive.getPoseX(), drive.getPoseY(), drive.getPoseHeading());
             t.update();
         }
         t.addLine("Finished");

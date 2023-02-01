@@ -68,7 +68,7 @@ public class MecanumBase extends MecanumDrive {
         LEFT
     }
 
-    public static Side REVERSE_SIDE = Side.RIGHT;
+    public static Side REVERSE_SIDE = Side.LEFT;
 
     public static PIDCoefficients TRANSLATIONAL_PID = new PIDCoefficients(1, 0, 0);
     public static PIDCoefficients HEADING_PID = new PIDCoefficients(8, 0, 0);

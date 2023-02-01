@@ -4,9 +4,7 @@ package org.firstinspires.ftc.teamcode.subsystems.vision;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfPoint;
-import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
@@ -18,20 +16,22 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class PoleDetector extends OpenCvPipeline
-{
+public class PoleDetection extends OpenCvPipeline {
     Telemetry telemetry;
-    public PoleDetector(Telemetry t) {telemetry = t;}
+
+    public PoleDetection(Telemetry t) {
+        telemetry = t;
+    }
+
     Mat mat = new Mat();
     public Rect pole = new Rect();
     final int screenWidth = 640;
 
     @Override
-    public Mat processFrame(Mat input)
-    {
+    public Mat processFrame(Mat input) {
         if (input.empty()) return input;
         //return poleDetection(input, new Scalar (95,64,20), new Scalar (135,255,255));
-        return poleDetection(input, new Scalar (13,64,20), new Scalar (27,255,255));
+        return poleDetection(input, new Scalar(13, 64, 20), new Scalar(27, 255, 255));
 
 //        Logitech HD Webcam C270, 640x480
 //        <Calibration
@@ -62,13 +62,13 @@ public class PoleDetector extends OpenCvPipeline
         contours.removeIf(c -> Imgproc.boundingRect(c).height < 20);
         Imgproc.drawContours(input, contours, -1, new Scalar(255, 255, 255));
 
-        if(!contours.isEmpty()) {
+        if (!contours.isEmpty()) {
             MatOfPoint biggestPole = Collections.max(contours, Comparator.comparingDouble(t0 -> Imgproc.boundingRect(t0).width));
             pole = Imgproc.boundingRect(biggestPole);
 
             Imgproc.rectangle(input, pole, new Scalar(255, 0, 0), 2);
-            Imgproc.circle(input, new Point(pole.x + (pole.width/2), pole.y + (pole.height/2)), 1, new Scalar(255, 0, 255), 3);
-            Imgproc.putText(input, "Pole " + (pole.x + (pole.width/2.0)) +","+(pole.y + (pole.height/2.0)), new Point(pole.x, pole.y < 10 ? (pole.y+pole.height+20) : (pole.y - 8)), Imgproc.FONT_HERSHEY_SIMPLEX, 0.8, new Scalar(255, 255, 255), 2);
+            Imgproc.circle(input, new Point(pole.x + (pole.width / 2), pole.y + (pole.height / 2)), 1, new Scalar(255, 0, 255), 3);
+            Imgproc.putText(input, "Pole " + (pole.x + (pole.width / 2.0)) + "," + (pole.y + (pole.height / 2.0)), new Point(pole.x, pole.y < 10 ? (pole.y + pole.height + 20) : (pole.y - 8)), Imgproc.FONT_HERSHEY_SIMPLEX, 0.8, new Scalar(255, 255, 255), 2);
         }
 
         contours.clear();
@@ -79,12 +79,11 @@ public class PoleDetector extends OpenCvPipeline
         return input;
     }
 
-    public double differenceX () {
-        double difference = middleX() - (screenWidth/2.0);
-        return difference;
+    public double differenceX() {
+        return middleX() - (screenWidth / 2.0);
     }
 
-    public double middleX () {
-        return (double) pole.x + (pole.width/2.0);
+    public double middleX() {
+        return (double) pole.x + (pole.width / 2.0);
     }
 }

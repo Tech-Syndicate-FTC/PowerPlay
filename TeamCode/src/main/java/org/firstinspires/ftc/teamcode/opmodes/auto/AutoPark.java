@@ -56,6 +56,7 @@ public class AutoPark extends LinearOpMode {
             t.addData("position", position);
             t.update();
         }
+
         waitForStart();
         if (opModeIsActive()) {
             camera.stopStreaming();

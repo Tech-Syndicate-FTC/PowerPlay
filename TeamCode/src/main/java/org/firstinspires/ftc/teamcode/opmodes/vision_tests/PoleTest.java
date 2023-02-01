@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.teamcode.subsystems.vision.PoleDetection;
 import org.firstinspires.ftc.teamcode.subsystems.vision.SleeveDetection;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
@@ -14,7 +15,7 @@ import org.openftc.easyopencv.OpenCvCameraRotation;
 @Autonomous(name = "Pole Detection Test", group = "vision")
 public class PoleTest extends LinearOpMode {
 
-    private SleeveDetection sleeveDetection;
+    private PoleDetection poleDetection;
     private OpenCvCamera camera;
     private MultipleTelemetry t;
 
@@ -27,8 +28,8 @@ public class PoleTest extends LinearOpMode {
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         camera = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, webcamName), cameraMonitorViewId);
         FtcDashboard.getInstance().startCameraStream(camera, 0);
-        sleeveDetection = new SleeveDetection();
-        camera.setPipeline(sleeveDetection);
+        poleDetection = new PoleDetection(telemetry);
+        camera.setPipeline(poleDetection);
 
         camera.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener() {
             @Override
@@ -42,7 +43,7 @@ public class PoleTest extends LinearOpMode {
         });
 
         while (!isStarted()) {
-            t.addData("Position: ", sleeveDetection.getPosition());
+            t.addData("difference x: ", poleDetection.differenceX());
             t.update();
         }
         waitForStart();
