@@ -9,7 +9,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 public class DriveTrain extends MecanumBase {
 
     public DrivePrecision drivePrecision = DrivePrecision.NORMAL;
-    public DriveType driveType = DriveType.FIELD_CENTRIC;
+    public DriveType driveType = DriveType.ROBOT_CENTRIC;
     // For Position
     public Pose2d poseEstimate = new Pose2d(0, 0, 0);
     public Vector2d gamepadInput = new Vector2d(0, 0);
@@ -41,7 +41,6 @@ public class DriveTrain extends MecanumBase {
 
         switch (drivePrecision) {
             case NORMAL:
-            default:
                 gamepadInput = new Vector2d(gamepadInput.getX() * 0.9, gamepadInput.getY() * 0.9);
                 break;
             case PRECISION:

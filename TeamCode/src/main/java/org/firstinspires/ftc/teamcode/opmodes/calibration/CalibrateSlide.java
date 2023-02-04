@@ -11,15 +11,16 @@ public class CalibrateSlide extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        MotorEx slide = new MotorEx(hardwareMap, "slide_left");
+        MotorEx slideLeft = new MotorEx(hardwareMap, "slide_left");
+        MotorEx slideRight = new MotorEx(hardwareMap, "slide_right");
 
-        slide.resetEncoder();
+        slideLeft.resetEncoder();
+        slideRight.resetEncoder();
 
         waitForStart();
 
         while (opModeIsActive() && !isStopRequested()) {
-            int position = slide.getCurrentPosition();
-            telemetry.addData("position", position);
+            telemetry.addData("position", "%d %d", slideLeft.getCurrentPosition(), slideRight.getCurrentPosition());
             telemetry.update();
         }
     }

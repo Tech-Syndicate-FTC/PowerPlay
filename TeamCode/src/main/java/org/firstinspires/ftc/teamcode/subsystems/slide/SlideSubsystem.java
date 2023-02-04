@@ -14,12 +14,13 @@ public class SlideSubsystem {
 
     public STATE state = STATE.GOOD;
 
-    public static final double MAX_EXTENSION = 37.75;
-    public final double TICKS_PER_IN = 81.8;
+    public static final double MAX_EXTENSION_IN = 37.5;
+    public static final double MAX_EXTENSION = 3040;
+    public static final double TICKS_PER_IN = MAX_EXTENSION / MAX_EXTENSION_IN;
 
     public final MotorEx slideLeft;
     public final MotorEx slideRight;
-    public final Motor.Encoder slideEncoder;
+    //public final Motor.Encoder slideEncoder;
     public final SimpleServo claw;
     public final SimpleServo armLeft;
     public final SimpleServo armRight;
@@ -32,28 +33,35 @@ public class SlideSubsystem {
 
     public boolean isExtended = false;
 
-    private double position;
+    public double leftPosition;
+    public double rightPosition;
 
-    public static double P = 0.06;
-    public static double I = 0.013;
+    public static double P = 0.01;
+    public static double I = 0.0;
     public static double D = 0.0;
-    public static double F = 0.0001;
+    public static double F = 0.0;
 
-    public double power = 0.0;
+    public double leftPower = 0.0;
+    public double rightPower = 0.0;
     public double targetPosition = 0.0;
 
     public double armAngle = 0.0;
 
+    public double pivotOffset = 0.0;
+
+    public boolean isAuto = false;
+
     public enum STATE {
         GOOD,
         FAILED_EXTEND,
-        FAILED_RETRACT
+        FAILED_RETRACT,
+        FAILED
     }
 
     public enum ClawState {
         OPEN(90),
-        CLOSED(150);
-        double targetAngle = 0;
+        CLOSED(158);
+        double targetAngle;
 
         ClawState(double angle) {
             this.targetAngle = angle;
@@ -64,11 +72,11 @@ public class SlideSubsystem {
         INTAKE(0),
         TRANSITION(120),
         SCORE_LOW(115),
-        UPRIGHT(140),
-        HOME(180),
-        SCORE(180);
+        UPRIGHT(160),
+        AIM(170),
+        SCORE(220);
 
-        double targetAngle = 0;
+        double targetAngle;
 
         ArmState(double angle) {
             this.targetAngle = angle;
@@ -76,28 +84,40 @@ public class SlideSubsystem {
     }
 
     public enum PivotState {
-        FLAT, PITCH_UP, SCORE, DOWN
+        FLAT(0),
+        AIM(60);
+
+        double targetOffset;
+
+        PivotState(double offset) {
+            this.targetOffset = offset;
+        }
     }
 
     public SlideSubsystem(HardwareMap hardwareMap, boolean isAuto) {
         this.slideLeft = new MotorEx(hardwareMap, "slide_left");
         this.slideRight = new MotorEx(hardwareMap, "slide_right");
-        this.claw = new SimpleServo(hardwareMap, "claw_servo", 0, 270);
-        armLeft = new SimpleServo(hardwareMap, "arm_pivot_left", 0, 300);
-        armLeft.setInverted(true);
-        armRight = new SimpleServo(hardwareMap, "arm_pivot_right", 0, 300);
-        clawPivot = new SimpleServo(hardwareMap, "claw_pivot", 0, 270);
+        slideLeft.setRunMode(Motor.RunMode.RawPower);
+        slideRight.setRunMode(Motor.RunMode.RawPower);
         slideRight.setInverted(true);
-        this.slideEncoder = slideLeft.encoder;
-        if (isAuto) {
-            slideEncoder.reset();
-        }
+        slideLeft.resetEncoder();
+        slideRight.resetEncoder();
 
-        this.profile = MotionProfileGenerator.generateSimpleMotionProfile(new MotionState(1, 0), new MotionState(0, 0), 30, 25);
+        this.claw = new SimpleServo(hardwareMap, "claw_servo", 0, 300);
+        this.armLeft = new SimpleServo(hardwareMap, "arm_pivot_left", 0, 300);
+        this.armLeft.setInverted(true);
+        this.armRight = new SimpleServo(hardwareMap, "arm_pivot_right", 0, 300);
+        this.clawPivot = new SimpleServo(hardwareMap, "claw_pivot", 0, 300);
+
+        this.profile = MotionProfileGenerator.generateSimpleMotionProfile(new MotionState(0, 0), new MotionState(0, 0), 30, 25);
 
         this.timer = new ElapsedTime();
         timer.reset();
         this.controller = new PIDFController(P, I, D, F);
+
+        this.isAuto = isAuto;
+
+        update(ClawState.OPEN);
     }
 
     public void update(ClawState state) {
@@ -108,8 +128,11 @@ public class SlideSubsystem {
         armAngle = state.targetAngle;
     }
 
+    public void update(PivotState state) {
+        pivotOffset = state.targetOffset;
+    }
+
     public void loop() {
-        /*
         controller = new PIDFController(P, I, D, F);
 
         curState = profile.get(timer.time());
@@ -119,19 +142,18 @@ public class SlideSubsystem {
 
         isExtended = (getPos() > TICKS_PER_IN * 2.5);
 
-        power = controller.calculate(position, targetPosition);
-        */
+        leftPower = controller.calculate(leftPosition, targetPosition);
+        rightPower = controller.calculate(rightPosition, targetPosition);
     }
 
     public void read() {
-        position = slideEncoder.getPosition();
+        leftPosition = slideLeft.getCurrentPosition();
+        rightPosition = slideRight.getCurrentPosition();
     }
 
     public void write() {
-        /*
-        slideRight.set(power);
-        slideLeft.set(power);
-        */
+        slideRight.set(rightPower);
+        slideLeft.set(leftPower);
         positionArm(armAngle);
     }
 
@@ -142,21 +164,21 @@ public class SlideSubsystem {
     }
 
     public void positionArm(double angle) {
-        clawPivot.turnToAngle(angle);
+        clawPivot.turnToAngle(angle + pivotOffset);
         armLeft.turnToAngle(angle + 1);
         armRight.turnToAngle(angle);
     }
 
     public void setSlideFactor(double factor) {
         double slideAddition = TICKS_PER_IN * factor;
-        double newPosition = position + slideAddition;
-        if (curState.getV() == 0 && newPosition >= 0 && newPosition <= MAX_EXTENSION * TICKS_PER_IN) {
+        double newPosition = getPos() + slideAddition;
+        if (curState.getV() == 0 && newPosition >= 0 && newPosition <= MAX_EXTENSION) {
             targetPosition = newPosition;
         }
     }
 
     public int getPos() {
-        return (int) position;
+        return (int) leftPosition;
     }
 
     public void resetTimer() {

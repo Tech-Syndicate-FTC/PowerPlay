@@ -17,7 +17,7 @@ public class CalibrateArm extends LinearOpMode {
     public static double groundAngle = 0;
     public static double uprightAngle = 140;
     public static double transitionAngle = 90;
-    public static double armAngle = transitionAngle;
+    public static double armAngle = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -36,7 +36,8 @@ public class CalibrateArm extends LinearOpMode {
             armRight.turnToAngle(armAngle);
         }
 
-        waitSeconds(2);
+        waitSeconds(20);
+        /*
         armAngle = uprightAngle;
         waitSeconds(2);
         armAngle = groundAngle;
@@ -47,6 +48,8 @@ public class CalibrateArm extends LinearOpMode {
         waitSeconds(2);
         armAngle = homeAngle;
         waitSeconds(2);
+
+         */
 
     }
 
